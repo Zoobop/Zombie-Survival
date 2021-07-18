@@ -48,6 +48,9 @@ void UEntityStatComponent::ApplyStatAttributeModifiers(TArray<class UStatAttribu
 
 					/** Update the Attribute changes */
 					OnStatAttributeChanged.Broadcast(StatAttribute);
+
+					/** Check for the attribute death flags */
+					CheckForDeath(StatAttribute);
 				}
 			}
 		}
@@ -56,9 +59,27 @@ void UEntityStatComponent::ApplyStatAttributeModifiers(TArray<class UStatAttribu
 	}
 }
 
-void UEntityStatComponent::ApplyStatAttributeSet(class UStatAttributeSet* AttributeSet)
+void UEntityStatComponent::HandleDeath()
 {
-	StatAttributeSet = AttributeSet;
+	UE_LOG(LogTemp, Warning, TEXT("Entity has died!"))
+}
+
+bool UEntityStatComponent::CheckForDeath(class UStatAttribute* AssociatedStatAttribute)
+{
+	/** Validate stat attribute */
+	if (AssociatedStatAttribute) {
+
+		/** Check if below the threshold */
+		if (AssociatedStatAttribute->GetCurrentValue() < AssociatedStatAttribute->GetMinValue()) {
+
+			/** Handle death */
+			HandleDeath();
+			OnHandleDeath();
+			return true;
+		}
+	}
+
+	return false;
 }
 
 // Called when the game starts
@@ -76,8 +97,8 @@ void UEntityStatComponent::BeginPlay()
 
 void UEntityStatComponent::PresetStatAttributes()
 {
-// 	for (UStatAttribute* StatAttribute : StatAttributeSet->GetStatAttributes()) {
-// 		StatAttribute->SetOwningStatAttributeSet(StatAttributeSet);
-// 	}
+ 	for (UStatAttribute* StatAttribute : StatAttributeSet->GetStatAttributes()) {
+ 		StatAttribute->SetOwningStatAttributeSet(StatAttributeSet);
+    }
 }
 

@@ -30,9 +30,6 @@ bool UGun::PostFireCheck()
 	/** Decrements current bullet amount */
 	CurrentMagazineAmmo--;
 
-	/** Call the event for the after effects */
-	OnGunFired.Broadcast();
-
 	/** Check if there are any more bullets */
 	return CurrentMagazineAmmo > 0;
 }
@@ -62,9 +59,6 @@ bool UGun::Reload()
 		CurrentMagazineAmmo += AmmoDifference;
 		CurrentAmmoReserves -= AmmoDifference;
 	}
-
-	/** Call the event for the after effects */
-	OnGunFired.Broadcast();
 
 	return true;
 }

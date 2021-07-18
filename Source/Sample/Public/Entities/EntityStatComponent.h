@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Interfaces/ESSDeathHandlerInterface.h"
 #include "EntityStatComponent.generated.h"
 
 
@@ -19,7 +20,7 @@ enum struct EFaction : uint8
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatAttributeChanged, class UStatAttribute*, StatAttribute);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class SAMPLE_API UEntityStatComponent : public UActorComponent
+class SAMPLE_API UEntityStatComponent : public UActorComponent, public IESSDeathHandlerInterface
 {
 	GENERATED_BODY()
 
@@ -37,9 +38,11 @@ public:
 	/** Applies the Stat Modification Modifier values to the component */
 	void ApplyStatAttributeModifiers(TArray<class UStatAttributeModifier*> Modifiers);
 
-	/** Allows blueprints to spawn in an stat attribute set on the entity */
-	UFUNCTION(BlueprintCallable)
-	void ApplyStatAttributeSet(class UStatAttributeSet* AttributeSet);
+	/** Handles the entities death */
+	void HandleDeath() override;
+
+	/** Checks the associated stat attribute if dead */
+	bool CheckForDeath(class UStatAttribute* AssociatedStatAttribute) override;
 
 	/** Returns the faction of the entity */
 	FORCEINLINE EFaction GetFaction() const { return Faction; }

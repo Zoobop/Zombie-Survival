@@ -2,6 +2,7 @@
 
 
 #include "StatAttributes/StatAttribute.h"
+#include "StatAttributes/StatAttributeSet.h"
 
 UStatAttribute::UStatAttribute()
 {

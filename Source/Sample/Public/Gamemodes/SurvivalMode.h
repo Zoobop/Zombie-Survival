@@ -18,6 +18,10 @@ class SAMPLE_API ASurvivalMode : public AGameModeBase
 public:
 	ASurvivalMode();
 
+	void UndeadDied(class AUndead* Killed, class ASoldier* Killer);
+
+	void PlayerDied(class ASoldier* Killed);
+
 protected:
 
 	/** Called at the start of the game */

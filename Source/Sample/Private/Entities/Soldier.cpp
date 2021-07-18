@@ -106,7 +106,7 @@ void ASoldier::UseCurrentGun()
 			if (bHit) {
 
 				/** Do whatever happens when the bullet hits... */
-				UE_LOG(LogTemp, Warning, TEXT("I hit something"))
+				UE_LOG(LogTemp, Warning, TEXT("I hit something %f"), HitResult.GetActor())
 
 				CheckRayCastActor(HitResult.GetActor());
 
@@ -114,11 +114,18 @@ void ASoldier::UseCurrentGun()
 				IEntityStatSystemInterface* Interface = Cast<IEntityStatSystemInterface>(HitResult.GetActor());
 				if (Interface) {
 
-					/** Apply stat modifiers */
-					Interface->ReceiveStatAttributeModification(ApplyStatAttributeModification());
+					/** Apply stat modifiers if not in the same faction */
+					if (GetEntityStatComponent()->GetFaction() != Interface->GetEntityStatComponent()->GetFaction()) {
+						Interface->ReceiveStatAttributeModification(ApplyStatAttributeModification());
 
-					UE_LOG(LogTemp, Warning, TEXT("Actor has Interface"))
+					}
+
+					UE_LOG(LogTemp, Warning, TEXT("Actor has Interface: %f"), Interface)
+
 				}
+
+				/** Invoke gun event */
+				OnGunFired.Broadcast(HitResult);
 			}
 
 			/** Debug line to visualize the bullet */
@@ -127,7 +134,7 @@ void ASoldier::UseCurrentGun()
 
 			/** Check current ammo count -- if PostFireCheck fails, the gun is force to reload */
 			if (!Gun->PostFireCheck()) {
-				OnGunStartReload.Broadcast();
+				OnGunStartReload.Broadcast(Gun);
 			}
 		}
 	}
@@ -199,7 +206,7 @@ void ASoldier::ReloadCurrentGun()
 		bIsReloading = true;
 
 		/** Try to reload weapon */
-		EquipmentComponent->GetCurrentWeapon()->Reload();
+		OnGunStartReload.Broadcast(EquipmentComponent->GetCurrentWeapon());
 	}
 }
 
@@ -240,22 +247,48 @@ void ASoldier::PreviousWeapon()
 	EquipmentComponent->SwitchWeapon(-1);
 }
 
+void ASoldier::ServerOnFire_Implementation()
+{
+	UseCurrentGun();
+
+	/** Start Timer */
+	GetWorldTimerManager().SetTimer(TimeHandle_HandleRefire, this, &ASoldier::UseCurrentGun, EquipmentComponent->GetCurrentWeapon()->GetFireRate(), true);
+}
+
+void ASoldier::ServerStopFire_Implementation()
+{
+	/** Stop Timer */
+	GetWorldTimerManager().ClearTimer(TimeHandle_HandleRefire);
+}
+
 void ASoldier::StartFire()
 {
 	/** Validate the current weapon */
 	if (EquipmentComponent->GetCurrentWeapon()) {
-		/** Fire weapon */
-		UseCurrentGun();
 
-		/** Start Timer */
-		GetWorldTimerManager().SetTimer(TimeHandle_HandleRefire, this, &ASoldier::UseCurrentGun, EquipmentComponent->GetCurrentWeapon()->GetFireRate(), true);
+		if (!HasAuthority()) {
+			/** Fire weapon */
+			ServerOnFire();
+		}
+		else {
+			/** Fire weapon */
+			UseCurrentGun();
+
+			/** Start Timer */
+			GetWorldTimerManager().SetTimer(TimeHandle_HandleRefire, this, &ASoldier::UseCurrentGun, EquipmentComponent->GetCurrentWeapon()->GetFireRate(), true);
+		}
 	}
 }
 
 void ASoldier::StopFire()
 {
-	/** Stop Timer */
-	GetWorldTimerManager().ClearTimer(TimeHandle_HandleRefire);
+	if (!HasAuthority()) {
+		ServerStopFire();
+	}
+	else {
+		/** Stop Timer */
+		GetWorldTimerManager().ClearTimer(TimeHandle_HandleRefire);
+	}
 }
 
 // FVector ASoldier::GetPawnViewLocation() const

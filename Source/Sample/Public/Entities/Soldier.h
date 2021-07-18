@@ -6,8 +6,11 @@
 #include "Entities/Entity.h"
 #include "Soldier.generated.h"
 
+/** Blueprints will bind to this event to do additional effects after the gun is fired */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGunFired, FHitResult, HitResult);
+
 /** Event to call when reloading */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGunStartReload);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGunStartReload, class UGun*, Gun);
 
 UCLASS(BlueprintType)
 class SAMPLE_API ASoldier : public AEntity
@@ -39,6 +42,12 @@ protected:
 ////////////////////////////** --------------- Gun Gameplay --------------- **//////////////////////////////////
 
 	/** ----------- Firing ------------ **/
+
+	UFUNCTION(Server, Reliable)
+	void ServerOnFire();
+
+	UFUNCTION(Server, Reliable)
+	void ServerStopFire();
 
 	/** Starts the process of firing -- Input Action */
 	UFUNCTION(BlueprintCallable)
@@ -193,6 +202,11 @@ protected:
 	/** --------------- Events --------------- **/
 
 
+	/** Event to add more functionality after fire */
+	UPROPERTY(BlueprintAssignable)
+	FOnGunFired OnGunFired;
+
+	/** Event to add more functionality to reloading */
 	UPROPERTY(BlueprintAssignable)
 	FOnGunStartReload OnGunStartReload;
 

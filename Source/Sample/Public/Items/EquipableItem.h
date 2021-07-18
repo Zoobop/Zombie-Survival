@@ -41,7 +41,7 @@ public:
 	/** --------------- Fields --------------- **/
 protected:
 
-	UPROPERTY(EditDefaultsOnly, Category = "Item")
+	UPROPERTY(VisibleInstanceOnly, Category = "Item")
 	class UEquipmentComponent* OwningEquipment;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")

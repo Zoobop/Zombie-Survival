@@ -9,6 +9,22 @@ ASurvivalMode::ASurvivalMode()
 	Instance = this;
 }
 
+void ASurvivalMode::UndeadDied(class AUndead* Killed, class ASoldier* Killer)
+{
+	if (Killed) {
+
+	}
+}
+
+void ASurvivalMode::PlayerDied(class ASoldier* Killed)
+{
+	if (Killed) {
+
+		Survivors.RemoveSingle(Killed);
+
+	}
+}
+
 void ASurvivalMode::BeginPlay()
 {
 

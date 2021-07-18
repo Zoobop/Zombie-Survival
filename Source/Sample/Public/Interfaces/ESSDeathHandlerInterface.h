@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "DamagableInterface.generated.h"
+#include "ESSDeathHandlerInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UDamagableInterface : public UInterface
+class UESSDeathHandlerInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,20 +16,19 @@ class UDamagableInterface : public UInterface
 /**
  * 
  */
-class SAMPLE_API IDamagableInterface
+class SAMPLE_API IESSDeathHandlerInterface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void ReceiveStatAttributeModification();
+	UFUNCTION()
+	virtual void HandleDeath() = 0;
 
-	virtual void ApplyStatAttributeModification();
+	UFUNCTION()
+	virtual bool CheckForDeath(class UStatAttribute* AssociatedStatAttribute) = 0;
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnReceiveStatAttributeModification();
-
-	//UFUNCTION(BlueprintImplementableEvent)
-	//class UStatModifier* OnInflictDamage();
+	void OnHandleDeath();
 };

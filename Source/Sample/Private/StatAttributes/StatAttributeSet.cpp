@@ -2,6 +2,7 @@
 
 
 #include "StatAttributes/StatAttributeSet.h"
+#include "StatAttributes/StatAttribute.h"
 
 
 void UStatAttributeSet::AddModifiers(TArray<class UStatAttributeModifier*> Modifiers)

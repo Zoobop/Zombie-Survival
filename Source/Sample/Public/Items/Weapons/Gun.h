@@ -7,8 +7,6 @@
 #include "Interfaces/ESSModifierHandlerInterface.h"
 #include "Gun.generated.h"
 
-/** Blueprints will bind to this event to do additional effects after the gun is fired */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGunFired);
 
 UCLASS(Blueprintable, BlueprintType, EditinlineNew)
 class SAMPLE_API UGun : public UWeapon, public IESSModifierHandlerInterface
@@ -26,6 +24,7 @@ public:
 	virtual void PreLoad() override;
 
 	/** Reloads the current gun and sets the ammo values accordingly */
+	UFUNCTION(BlueprintCallable)
 	bool Reload();
 
 	/** Decrements the current amount of bullets in clip/magazine and returns if there are bullets remaining */
@@ -97,9 +96,5 @@ protected:
 	/** Current reserves */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = 0))
 	int32 CurrentAmmoReserves;
-
-	/** Event to add more functionality after fire */
-	UPROPERTY(BlueprintAssignable)
-	FOnGunFired OnGunFired;
 };
 

@@ -35,6 +35,8 @@ public:
 	void SetOwningStatAttributeSet(class UStatAttributeSet* StatAttributeSet);
 
 	FORCEINLINE FName GetStatAttributeTag() const { return StatAttributeTag; }
+	FORCEINLINE int32 GetCurrentValue() const { return CurrentValue; }
+	FORCEINLINE int32 GetMinValue() const { return MinValue; }
 
 protected:
 
@@ -60,6 +62,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute")
 	int32 InfiniteBonusValue;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute|Flags")
+	bool bChecksForDeath;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute|Tags")
 	FName StatAttributeTag;
