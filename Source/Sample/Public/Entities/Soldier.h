@@ -10,7 +10,7 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGunFired, FHitResult, HitResult);
 
 /** Event to call when reloading */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGunStartReload, class UGun*, Gun);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGunReloaded);
 
 UCLASS(BlueprintType)
 class SAMPLE_API ASoldier : public AEntity
@@ -81,9 +81,19 @@ protected:
 
 	/** ----------- Reloading ------------ **/
 
+	/** Server start reload call */
+	UFUNCTION(Server, Reliable)
+	void ServerStartReload();
+
 	/** Reload the current weapon -- Input Action */
 	UFUNCTION(BlueprintCallable)
-	void ReloadCurrentGun();
+	void StartReload();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnGunStartReload(class UGun* Gun);
+
+	UFUNCTION(BlueprintCallable)
+	void FinishReload();
 
 	/** ----------- General Usage ------------ **/
 
@@ -208,7 +218,7 @@ protected:
 
 	/** Event to add more functionality to reloading */
 	UPROPERTY(BlueprintAssignable)
-	FOnGunStartReload OnGunStartReload;
+	FOnGunReloaded OnGunReloaded;
 
 
 private:

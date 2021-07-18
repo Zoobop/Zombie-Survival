@@ -61,7 +61,9 @@ void UEntityStatComponent::ApplyStatAttributeModifiers(TArray<class UStatAttribu
 
 void UEntityStatComponent::HandleDeath()
 {
+	IESSDeathHandlerInterface::HandleDeath();
 	UE_LOG(LogTemp, Warning, TEXT("Entity has died!"))
+	GetOwner()->Destroy();
 }
 
 bool UEntityStatComponent::CheckForDeath(class UStatAttribute* AssociatedStatAttribute)
@@ -70,11 +72,10 @@ bool UEntityStatComponent::CheckForDeath(class UStatAttribute* AssociatedStatAtt
 	if (AssociatedStatAttribute) {
 
 		/** Check if below the threshold */
-		if (AssociatedStatAttribute->GetCurrentValue() < AssociatedStatAttribute->GetMinValue()) {
+		if (AssociatedStatAttribute->GetCurrentValue() <= AssociatedStatAttribute->GetMinValue()) {
 
 			/** Handle death */
 			HandleDeath();
-			OnHandleDeath();
 			return true;
 		}
 	}

@@ -24,7 +24,7 @@ class SAMPLE_API IESSDeathHandlerInterface
 public:
 
 	UFUNCTION()
-	virtual void HandleDeath() = 0;
+	virtual void HandleDeath();
 
 	UFUNCTION()
 	virtual bool CheckForDeath(class UStatAttribute* AssociatedStatAttribute) = 0;

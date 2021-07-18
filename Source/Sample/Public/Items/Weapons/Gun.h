@@ -54,47 +54,55 @@ protected:
 
 
 	/** Base weapon Stat Modifier */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|StatModifiers")
 	class UStatAttributeModifier* StatAttributeModifier;
 
 	/** Base fire rate */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = 1))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 1))
 	float DefaultFireRate;
 
 	/** Base bullet velocity */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = 1))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 1))
 	float DefaultBulletVelocity;
 
 	/** Base recoil */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 0))
 	int32 DefaultRecoilAmount;
 
 	/** Base ammunition in each clip/magazine */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 0))
 	int32 DefaultAmmoPerMagazine;
 
 	/** Base number of clips/magazines that the gun starts with */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 0))
 	int32 DefaultNumberOfMagazines;
 
 	/** Base range where after the bullet reaches this distance away from the firing, the damage will be reduce by the damage fall-off amount */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = 1))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 1))
 	float DefaultDamageFallOffRange;
 
 	/** Base damage fall-off amount past the damage fall-off range */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = 1))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 1))
 	int32 DefaultDamageFallOffAmount;
 
 	/** Ammo Type the gun is using */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General")
 	TSubclassOf<class ABullet> AmmoType;
 
 	/** Current clip/magazine ammo amount */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = 0))
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 0))
 	int32 CurrentMagazineAmmo;
 
 	/** Current reserves */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Gun", meta = (ClampMin = 0))
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 0))
 	int32 CurrentAmmoReserves;
+
+	/** Gun fire animation */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|Animations")
+	class UAnimMontage* FireAnimation;
+
+	/** Gun reload animation */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|Animations")
+	class UAnimMontage* ReloadAnimation;
 };
 

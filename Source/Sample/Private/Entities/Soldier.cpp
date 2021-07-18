@@ -134,7 +134,7 @@ void ASoldier::UseCurrentGun()
 
 			/** Check current ammo count -- if PostFireCheck fails, the gun is force to reload */
 			if (!Gun->PostFireCheck()) {
-				OnGunStartReload.Broadcast(Gun);
+				StartReload();
 			}
 		}
 	}
@@ -197,17 +197,51 @@ void ASoldier::StopCrouch_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed += CrouchSpeedAmount;
 }
 
-void ASoldier::ReloadCurrentGun()
+void ASoldier::ServerStartReload_Implementation()
 {
-	/** Validate the current weapon */
-	if (EquipmentComponent->GetCurrentWeapon()) {
+	/** Check if currently not reloading */
+	if (!bIsReloading) {
+		/** Validate the current weapon */
+		if (EquipmentComponent->GetCurrentWeapon()) {
 
-		/** Set reload bool to true */
-		bIsReloading = true;
+			/** Set reload bool to true */
+			bIsReloading = true;
 
-		/** Try to reload weapon */
-		OnGunStartReload.Broadcast(EquipmentComponent->GetCurrentWeapon());
+			OnGunStartReload(EquipmentComponent->GetCurrentWeapon());
+		}
 	}
+
+}
+
+void ASoldier::StartReload()
+{
+	/** Check authority */
+	if (!HasAuthority()) {
+		/** Check if currently not reloading */
+		if (!bIsReloading) {
+			/** Validate the current weapon */
+			if (EquipmentComponent->GetCurrentWeapon()) {
+
+				/** Set reload bool to true */
+				bIsReloading = true;
+
+				OnGunStartReload(EquipmentComponent->GetCurrentWeapon());
+			}
+		}
+	}
+	else {
+		/** Server call */
+		ServerStartReload();
+	}
+
+}
+
+void ASoldier::FinishReload()
+{
+	EquipmentComponent->GetCurrentWeapon()->Reload();
+	bIsReloading = false;
+
+	OnGunReloaded.Broadcast();
 }
 
 void ASoldier::ADS_Implementation()
@@ -310,7 +344,7 @@ void ASoldier::SetupPlayerInputComponent(class UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("ADS", IE_Pressed, this, &ASoldier::ADS);
 	PlayerInputComponent->BindAction("ADS", IE_Released, this, &ASoldier::StopADS);
 
-	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ASoldier::ReloadCurrentGun);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ASoldier::StartReload);
 
 	PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, this, &ASoldier::NextWeapon);
 	PlayerInputComponent->BindAction("PreviousWeapon", IE_Pressed, this, &ASoldier::PreviousWeapon);
