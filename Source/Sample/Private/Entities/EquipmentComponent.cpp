@@ -2,8 +2,10 @@
 
 
 #include "Entities/EquipmentComponent.h"
+#include "Entities/Soldier.h"
 #include "Items/Weapons/Gun.h"
 #include "Items/Armor/Armor.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 UEquipmentComponent::UEquipmentComponent()
@@ -16,30 +18,27 @@ UEquipmentComponent::UEquipmentComponent()
   	DefaultArmor.Add(1, nullptr);
   	DefaultArmor.Add(2, nullptr);
   	DefaultArmor.Add(3, nullptr);
-  	DefaultArmor.Add(4, nullptr);
-  	DefaultArmor.Add(5, nullptr);
 }
 
-
-bool UEquipmentComponent::AddToEquipSlot(class UEquipableItem* ItemToAdd)
+bool UEquipmentComponent::AddToEquipSlot(class AEquipableItem* ItemToAdd)
 {
  	/** Check if ItemToAdd is valid */
   	if (ItemToAdd) {
   
   		/** Check if the ItemToRemove is a Weapon or Armor */
-  		if (ItemToAdd->GetItemType() == EEquipableType::Weapon && EquippedWeapons.Num() < WeaponCapacity) {
+  		if (ItemToAdd->GetItemType() == EEquipableType::EQTYPE_WEAPON && EquippedWeapons.Num() < WeaponCapacity) {
   			/** Cast item to Weapon and add */
-  			EquippedWeapons.Add(static_cast<UGun*>(ItemToAdd));
+  			EquippedWeapons.Add(Cast<AGun>(ItemToAdd));
   
   			/** Update Equipment UI */
   			OnEquipmentChanged.Broadcast();
   
   			/** Update Current Weapon Mesh */
-  			OnWeaponSwitched.Broadcast();
+  			OnWeaponSwitched.Broadcast(CurrentWeapon);
   		}
-  		else if (ItemToAdd->GetItemType() == EEquipableType::Armor && EquippedArmor.Num() < ArmorCapacity) {
+  		else if (ItemToAdd->GetItemType() == EEquipableType::EQTYPE_ARMOR && EquippedArmor.Num() < ArmorCapacity) {
   			/** Cast item to Armor */
-  			const auto ArmorItem = static_cast<UArmor*>(ItemToAdd);
+  			const auto ArmorItem = Cast<AArmor>(ItemToAdd);
   
   			/** Remove the old item and drop or destroy */
   			uint8 Key = static_cast<uint8>(ArmorItem->GetArmorType());
@@ -57,7 +56,7 @@ bool UEquipmentComponent::AddToEquipSlot(class UEquipableItem* ItemToAdd)
   	return false;
 }
   
-bool UEquipmentComponent::RemoveFromEquipSlot(class UEquipableItem* ItemToRemove)
+bool UEquipmentComponent::RemoveFromEquipSlot(class AEquipableItem* ItemToRemove)
 {
   	/** Check if ItemToRemove is valid */
   	if (ItemToRemove) {
@@ -65,7 +64,7 @@ bool UEquipmentComponent::RemoveFromEquipSlot(class UEquipableItem* ItemToRemove
   		/** Check if the ItemToRemove is a Weapon */
   		if (EquippedWeapons.Contains(ItemToRemove)) {
   			/** Cast item to Weapon */
-  			const auto OldWeaponItem = static_cast<UGun*>(ItemToRemove);
+  			const auto OldWeaponItem = Cast<AGun>(ItemToRemove);
   
   			/** Validate the old item */
   			if (OldWeaponItem) {
@@ -78,14 +77,14 @@ bool UEquipmentComponent::RemoveFromEquipSlot(class UEquipableItem* ItemToRemove
   			OnEquipmentChanged.Broadcast();
   
   			/** Update Current Weapon Mesh -- in case it was changed */
-  			OnWeaponSwitched.Broadcast();
+  			OnWeaponSwitched.Broadcast(CurrentWeapon);
   			return true;
   		}
   
   		/** Check if the ItemToRemove is Armor */
-  		if (ItemToRemove->GetItemType() == EEquipableType::Armor) {
+  		if (ItemToRemove->GetItemType() == EEquipableType::EQTYPE_ARMOR) {
   			/** Cast item to Armor */
-  			const auto ArmorItem = static_cast<UArmor*>(ItemToRemove);
+  			const auto ArmorItem = Cast<AArmor>(ItemToRemove);
   
   			/** Validate the old item */
   			if (ArmorItem) {
@@ -107,48 +106,93 @@ bool UEquipmentComponent::RemoveFromEquipSlot(class UEquipableItem* ItemToRemove
   	return false;
 }
 
-class USkeletalMesh* UEquipmentComponent::DisplayWeaponMesh()
+void UEquipmentComponent::ServerPrepWeaponSwap_Implementation(int32 ValueChange)
 {
- 	/** Validate current weapon */
-  	if (CurrentWeapon) {
-  		return CurrentWeapon->GetSkeletalMesh();
-  	}
- 
- 	return nullptr;
+	PrepWeaponSwap(ValueChange);
 }
 
-void UEquipmentComponent::SwitchWeapon(int32 ValueChange)
+void UEquipmentComponent::PrepWeaponSwap(int32 ValueChange)
 {
 	/** Modify weapon index */
 	WeaponIndex += ValueChange;
 
-   	/** Clamp index */
-   	if (WeaponIndex < 0)
-   		WeaponIndex = EquippedWeapons.Num() - 1;
-   	else if (WeaponIndex > EquippedWeapons.Num() - 1)
-   		WeaponIndex = 0;
-   
-   	/** Get weapon from index and assign to current weapon */
-   	CurrentWeapon = EquippedWeapons[WeaponIndex];
- 
-  	/** Update weapon mesh */
-  	OnWeaponSwitched.Broadcast();
+	/** Clamp index */
+	if (WeaponIndex < 0)
+		WeaponIndex = EquippedWeapons.Num() - 1;
+	else if (WeaponIndex > EquippedWeapons.Num() - 1)
+		WeaponIndex = 0;
+
+	/** Update weapon */
+	OnWeaponSwitched.Broadcast(EquippedWeapons[WeaponIndex]);
 }
- 
+
+void UEquipmentComponent::SwitchOutWeapon(class AGun* WeaponToSwitchTo)
+{
+	/** Validate current weapon and weapon to switch to */
+	if (CurrentWeapon && WeaponToSwitchTo) {
+		/** Hide weapon that is being switched out */
+		CurrentWeapon->SetActorHiddenInGame(true);
+
+		/** Get weapon from index and assign to current weapon -- Set actor to be visible */
+		CurrentWeapon = WeaponToSwitchTo;
+		CurrentWeapon->SetActorHiddenInGame(false);
+	}
+}
+
+void UEquipmentComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UEquipmentComponent, CurrentWeapon);
+	DOREPLIFETIME(UEquipmentComponent, WeaponIndex);
+}
+
+class AGun* UEquipmentComponent::HandleWeaponSpawn(TSubclassOf<class AGun> Gun)
+{
+	if (Gun) {
+
+		ASoldier* Player = Cast<ASoldier>(GetOwner());
+
+		if (Player) {
+
+			FTransform WeaponHolderSocket = Player->GetWeaponHolder()->GetComponentTransform();
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = Player;
+			SpawnParams.Instigator = Player;
+
+			AGun* SpawnedGun = GetWorld()->SpawnActor<AGun>(Gun, WeaponHolderSocket, SpawnParams);
+			SpawnedGun->LoadBullets();
+			SpawnedGun->SetGunOwner(Player);
+
+			SpawnedGun->AttachToComponent(Player->GetWeaponHolder(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+			SpawnedGun->SetActorHiddenInGame(true);
+			return SpawnedGun;
+		}
+	}
+	return nullptr;
+}
+
 // Called when the game starts
 void UEquipmentComponent::BeginPlay()
 {
  	Super::BeginPlay();
+	
+	WeaponSetup();
+}
 
-  	/** Add starting weapons to weapon equip slots */
- 	EquippedWeapons.Append(DefaultWeapons);
-  
-  	/** Add starting armor to armor equip slots */
- 	EquippedArmor.Append(DefaultArmor);
-  
-  	/** Assign the current weapon to be the first weapon in weapons list */
-  	CurrentWeapon = EquippedWeapons[0];
+void UEquipmentComponent::WeaponSetup()
+{
+	for (auto DefaultGun : DefaultWeapons) {
+		AGun* Gun = HandleWeaponSpawn(DefaultGun);
+		EquippedWeapons.Add(Gun);
+	}
 
-  	/** Update current weapon mesh */
-  	OnWeaponSwitched.Broadcast();
+	/** Assign the current weapon to be the first weapon in weapons list */
+	if (EquippedWeapons[0]) {
+		CurrentWeapon = EquippedWeapons[0];
+		CurrentWeapon->SetActorHiddenInGame(false);
+
+		/** Update current weapon mesh */
+		OnEquipmentChanged.Broadcast();
+	}
 }

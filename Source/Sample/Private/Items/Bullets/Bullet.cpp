@@ -13,6 +13,7 @@ ABullet::ABullet()
 	PrimaryActorTick.bCanEverTick = true;
 
 	bReplicates = true;
+	InitialLifeSpan = 1.0f;
 
 	/** Set default bullet values */
 	BulletSpeed = 3000.0f;
@@ -30,15 +31,15 @@ ABullet::ABullet()
 	RootComponent = BulletMesh;
 }
 
-void ABullet::SetUpBullet(class UGun* Gun)
+void ABullet::SetUpBullet(class AGun* Gun)
 {
   	/** Gun Validation */
   	if (Gun) {
   		OwningGun = Gun;
   
  		/** Set bullet speed */
-  		BulletMovement->InitialSpeed = Gun->GetBulletVelocity();
-  		BulletMovement->MaxSpeed = Gun->GetBulletVelocity();
+  		BulletMovement->InitialSpeed = Gun->GetBulletVelocity() * 10.0f;
+  		BulletMovement->MaxSpeed = Gun->GetBulletVelocity() * 10.0f;
   	}
 }
 

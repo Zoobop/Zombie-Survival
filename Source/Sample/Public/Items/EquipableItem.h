@@ -3,29 +3,29 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
+#include "GameFramework/Actor.h"
 #include "EquipableItem.generated.h"
 
 UENUM(BlueprintType)
 enum struct EEquipableType : uint8
 {
-	Weapon,
-	Armor,
-	Consumable
+	EQTYPE_WEAPON		UMETA(DisplayName = "Weapon"),
+	EQTYPE_ARMOR		UMETA(DisplayName = "Armor"),
+	EQTYPE_CONSUMABLE	UMETA(DisplayName = "Consumable"),
 };
 
-UCLASS(Abstract, Blueprintable, BlueprintType, EditinlineNew, DefaultToInstanced)
-class SAMPLE_API UEquipableItem : public UObject
+UCLASS(Abstract, Blueprintable, BlueprintType, DefaultToInstanced)
+class SAMPLE_API AEquipableItem : public AActor
 {
 	GENERATED_BODY()
 
-		/** ------------- Functions ------------- **/
+/** ------------- Functions ------------- **/
 public:
 
-	UEquipableItem();
+	AEquipableItem();
 
 	/** Use the item */
-	virtual void Use(class AEntity* Character) PURE_VIRTUAL(UEquipableItem, );
+	virtual void Use(class AEntity* Character) PURE_VIRTUAL(AEquipableItem, );
 
 	/** Use the item (Blueprint) */
 	UFUNCTION(BlueprintImplementableEvent)
@@ -36,16 +36,16 @@ public:
 	/** Returns the mesh of the equipable item */
 	FORCEINLINE EEquipableType GetItemType() const { return Type; }
 	/** Returns the mesh of the equipable item */
-	FORCEINLINE class USkeletalMesh* GetSkeletalMesh() const { return SkeletalMesh; }
+	FORCEINLINE class USkeletalMesh* GetSkeletalMesh() const { return SkeletalMeshComponent->SkeletalMesh; }
 
-	/** --------------- Fields --------------- **/
+/** --------------- Fields --------------- **/
 protected:
 
-	UPROPERTY(VisibleInstanceOnly, Category = "Item")
+	UPROPERTY()
 	class UEquipmentComponent* OwningEquipment;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	class USkeletalMesh* SkeletalMesh;
+	class USkeletalMeshComponent* SkeletalMeshComponent;
 
 	/** Item Thumbnail */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")

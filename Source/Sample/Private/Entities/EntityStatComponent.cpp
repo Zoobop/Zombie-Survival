@@ -61,9 +61,8 @@ void UEntityStatComponent::ApplyStatAttributeModifiers(TArray<class UStatAttribu
 
 void UEntityStatComponent::HandleDeath()
 {
-	IESSDeathHandlerInterface::HandleDeath();
 	UE_LOG(LogTemp, Warning, TEXT("Entity has died!"))
-	GetOwner()->Destroy();
+	OnHandleDeath.Broadcast();
 }
 
 bool UEntityStatComponent::CheckForDeath(class UStatAttribute* AssociatedStatAttribute)

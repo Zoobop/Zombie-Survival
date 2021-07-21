@@ -9,22 +9,20 @@
 UENUM(BlueprintType)
 enum struct EArmorType : uint8
 {
-	Head,
-	Body,
-	Arms,
-	Hands,
-	Legs,
-	Feet
+	ARTYPE_HEAD		UMETA(DisplayName = "Head"),
+	ARTYPE_TORSO	UMETA(DisplayName = "Torso"),
+	ARTYPE_ARMS		UMETA(DisplayName = "Arms"),
+	ARTYPE_LEGS		UMETA(DisplayName = "Legs"),
 };
 
-UCLASS(Abstract, Blueprintable, BlueprintType, EditinlineNew)
-class SAMPLE_API UArmor : public UEquipableItem
+UCLASS(Abstract, Blueprintable, BlueprintType)
+class SAMPLE_API AArmor : public AEquipableItem
 {
 	GENERATED_BODY()
 
 public:
 
-	UArmor();
+	AArmor();
 
 	/** Returns the armor type */
 	FORCEINLINE EArmorType GetArmorType() const { return ArmorType; }

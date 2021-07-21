@@ -6,6 +6,9 @@
 #include "UObject/Interface.h"
 #include "ESSDeathHandlerInterface.generated.h"
 
+/** Blueprints will bind to this event to handle additional functionality on death */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHandleDeath);
+
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
 class UESSDeathHandlerInterface : public UInterface
@@ -24,11 +27,8 @@ class SAMPLE_API IESSDeathHandlerInterface
 public:
 
 	UFUNCTION()
-	virtual void HandleDeath();
+	virtual void HandleDeath() = 0;
 
 	UFUNCTION()
 	virtual bool CheckForDeath(class UStatAttribute* AssociatedStatAttribute) = 0;
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnHandleDeath();
 };

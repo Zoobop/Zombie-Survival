@@ -3,7 +3,7 @@
 
 #include "Items/Armor/Armor.h"
 
-UArmor::UArmor()
+AArmor::AArmor()
 {
 
 }

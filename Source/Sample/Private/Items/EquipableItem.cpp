@@ -3,7 +3,7 @@
 
 #include "Items/EquipableItem.h"
 
-UEquipableItem::UEquipableItem()
+AEquipableItem::AEquipableItem()
 {
 
 }

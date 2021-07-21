@@ -73,5 +73,8 @@ protected:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnStatAttributeChanged OnStatAttributeChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHandleDeath OnHandleDeath;
 };
 

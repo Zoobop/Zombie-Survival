@@ -24,15 +24,15 @@ ASoldier::ASoldier()
 
 	/** Weapon Holder and Mesh */
 	WeaponHolder = CreateDefaultSubobject<USceneComponent>("WeaponHolder");
-	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
+	WeaponActor = CreateDefaultSubobject<UChildActorComponent>("WeaponActor");
 
 	WeaponHolder->SetupAttachment(GetMesh(), "EquipSlot");
-	WeaponMesh->SetupAttachment(WeaponHolder);
+	WeaponActor->SetupAttachment(WeaponHolder);
 
 	/** Set game play capabilities */
+	bCanSwitchWeapons = true;
 	bCanFire = true;
 	bCanSprint = true;
-	bCanReload = false;
 	bIsCrouching = false;
 
 	DefaultMovementSpeed = 400.0f;
@@ -46,7 +46,7 @@ ASoldier::ASoldier()
 
 }
 
-void ASoldier::UseItem(class UEquipableItem* Item)
+void ASoldier::UseItem(class AEquipableItem* Item)
 {
   	Item->Use(this);
   	Item->OnUse(this);
@@ -65,7 +65,7 @@ TArray<class UStatAttributeModifier*> ASoldier::ApplyStatAttributeModification()
 	/** Validate current weapon */
 	if (EquipmentComponent->GetCurrentWeapon()) {
 
-		UGun* Gun = EquipmentComponent->GetCurrentWeapon();
+		AGun* Gun = EquipmentComponent->GetCurrentWeapon();
 
 		/** Add Gun's stat modifier */
 		Modifiers.Add(Gun->GetStatAttributeModifier());
@@ -83,59 +83,11 @@ TArray<class UStatAttributeModifier*> ASoldier::ApplyStatAttributeModification()
 
 void ASoldier::UseCurrentGun()
 {
-	if (bCanFire) {
-		/** Find weapon fire location */
-		FTransform SpawnTransform = WeaponHolder->GetComponentTransform();
-		SpawnTransform.SetLocation(FollowCamera->GetComponentRotation().Vector() * 10 + WeaponHolder->GetSocketLocation("Muzzle"));
+	AGun* Gun = EquipmentComponent->GetCurrentWeapon();
 
-		/** Local variable of the current weapon for ease of writing */
-		const auto Gun = EquipmentComponent->GetCurrentWeapon();
-
-		/** Check if there are bullets to shoot */
-		if (Gun->HasBulletsToFire()) {
-
-			/** Find gun muzzle location location */
-			FVector TraceEnd = FollowCamera->GetComponentLocation() + (FollowCamera->GetComponentRotation().Vector() * 10000.0f);
-
-			/** Setup ray casting */
-			FHitResult HitResult;
-			FCollisionQueryParams QueryParams;
-			bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, FollowCamera->GetComponentLocation(), TraceEnd, ECC_Visibility, QueryParams);
-
-			/** Check for hit */
-			if (bHit) {
-
-				/** Do whatever happens when the bullet hits... */
-				UE_LOG(LogTemp, Warning, TEXT("I hit something %f"), HitResult.GetActor())
-
-				CheckRayCastActor(HitResult.GetActor());
-
-				/** Checks for IEntityStatSystemInterface */
-				IEntityStatSystemInterface* Interface = Cast<IEntityStatSystemInterface>(HitResult.GetActor());
-				if (Interface) {
-
-					/** Apply stat modifiers if not in the same faction */
-					if (GetEntityStatComponent()->GetFaction() != Interface->GetEntityStatComponent()->GetFaction()) {
-						Interface->ReceiveStatAttributeModification(ApplyStatAttributeModification());
-
-					}
-
-					UE_LOG(LogTemp, Warning, TEXT("Actor has Interface: %f"), Interface)
-
-				}
-
-				/** Invoke gun event */
-				OnGunFired.Broadcast(HitResult);
-			}
-
-			/** Debug line to visualize the bullet */
-			DrawDebugLine(GetWorld(), FollowCamera->GetComponentLocation(), TraceEnd, FColor::Red, false, 1.0f); /// From Camera
-			DrawDebugLine(GetWorld(), SpawnTransform.GetLocation(), TraceEnd, FColor::Emerald, false, 1.0f); /// From Gun Muzzle
-
-			/** Check current ammo count -- if PostFireCheck fails, the gun is force to reload */
-			if (!Gun->PostFireCheck()) {
-				StartReload();
-			}
+	if (Gun) {
+		if (Gun->Fire()) {
+			StartReload();
 		}
 	}
 }
@@ -199,15 +151,16 @@ void ASoldier::StopCrouch_Implementation()
 
 void ASoldier::ServerStartReload_Implementation()
 {
-	/** Check if currently not reloading */
-	if (!bIsReloading) {
-		/** Validate the current weapon */
-		if (EquipmentComponent->GetCurrentWeapon()) {
+	AGun* Gun = EquipmentComponent->GetCurrentWeapon();
 
-			/** Set reload bool to true */
-			bIsReloading = true;
+	/** Validate the current weapon */
+	if (Gun) {
+		/** Check if ammo is not full and if not already reloading */
+		if (!Gun->IsMagazineFull() && !Gun->HasNoAmmo()) {
 
-			OnGunStartReload(EquipmentComponent->GetCurrentWeapon());
+			/** Set gun firing capability to false */
+			Gun->SetFire(false);
+			OnGunStartReload(Gun);
 		}
 	}
 
@@ -217,34 +170,37 @@ void ASoldier::StartReload()
 {
 	/** Check authority */
 	if (!HasAuthority()) {
-		/** Check if currently not reloading */
-		if (!bIsReloading) {
-			/** Validate the current weapon */
-			if (EquipmentComponent->GetCurrentWeapon()) {
-
-				/** Set reload bool to true */
-				bIsReloading = true;
-
-				OnGunStartReload(EquipmentComponent->GetCurrentWeapon());
-			}
-		}
-	}
-	else {
 		/** Server call */
 		ServerStartReload();
+	}
+	else {
+		AGun* Gun = EquipmentComponent->GetCurrentWeapon();
+
+		/** Validate the current weapon */
+		if (Gun) {
+			/** Check if ammo is not full and if not already reloading */
+			if (!Gun->IsMagazineFull() && !Gun->HasNoAmmo()) {
+
+				/** Set gun firing capability to false */
+				Gun->SetFire(false);
+				OnGunStartReload(Gun);
+			}
+		}
 	}
 
 }
 
 void ASoldier::FinishReload()
 {
-	EquipmentComponent->GetCurrentWeapon()->Reload();
-	bIsReloading = false;
+	AGun* Gun = EquipmentComponent->GetCurrentWeapon();
 
+	Gun->Reload();
+	Gun->SetFire(true);
+	
 	OnGunReloaded.Broadcast();
 }
 
-void ASoldier::ADS_Implementation()
+void ASoldier::ServerADS_Implementation()
 {
 	/** Set replicated bool to true */
 	bIsAiming = true;
@@ -256,8 +212,24 @@ void ASoldier::ADS_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed -= 100;
 }
 
+void ASoldier::ADS()
+{
+	if (!HasAuthority()) {
+		ServerADS();
+	}
+	else {
+		/** Set replicated bool to true */
+		bIsAiming = true;
 
-void ASoldier::StopADS_Implementation()
+		/** Call blueprint implementation */
+		OnStartADS();
+
+		/** Adjust movement speed */
+		GetCharacterMovement()->MaxWalkSpeed -= 100;
+	}
+}
+
+void ASoldier::ServerStopADS_Implementation()
 {
 	/** Set replicated bool to false */
 	bIsAiming = false;
@@ -269,16 +241,57 @@ void ASoldier::StopADS_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed += 100;
 }
 
+void ASoldier::StopADS()
+{
+	if (!HasAuthority()) {
+		ServerStopADS();
+	}
+	else {
+		/** Set replicated bool to false */
+		bIsAiming = false;
+
+		/** Call blueprint implementation */
+		OnStopADS();
+
+		/** Adjust movement speed */
+		GetCharacterMovement()->MaxWalkSpeed += 100;
+	}
+}
+
+void ASoldier::ServerSwitchWeapon_Implementation(int32 Index)
+{
+	if (bCanSwitchWeapons) {
+		EquipmentComponent->ServerPrepWeaponSwap(Index);
+		bCanSwitchWeapons = false;
+	}
+}
+
 void ASoldier::NextWeapon()
 {
-	/** Adds plus 1 to the current weapon index */
-	EquipmentComponent->SwitchWeapon(1);
+	if (!HasAuthority()) {
+		ServerSwitchWeapon(1);
+	}
+	else {
+		if (bCanSwitchWeapons) {
+			/** Adds plus 1 to the current weapon index */
+			EquipmentComponent->PrepWeaponSwap(1);
+			bCanSwitchWeapons = false;
+		}
+	}
 }
 
 void ASoldier::PreviousWeapon()
 {
-	/** Adds negative 1 to the current weapon index */
-	EquipmentComponent->SwitchWeapon(-1);
+	if (!HasAuthority()) {
+		ServerSwitchWeapon(-1);
+	}
+	else {
+		if (bCanSwitchWeapons) {
+			/** Adds negative 1 to the current weapon index */
+			EquipmentComponent->PrepWeaponSwap(-1);
+			bCanSwitchWeapons = false;
+		}
+	}
 }
 
 void ASoldier::ServerOnFire_Implementation()
@@ -325,14 +338,10 @@ void ASoldier::StopFire()
 	}
 }
 
-// FVector ASoldier::GetPawnViewLocation() const
-// {
-// 	if (FollowCamera) {
-// 		return FollowCamera->GetComponentLocation();
-// 	}
-// 
-// 	return Super::GetPawnViewLocation();
-// }
+void ASoldier::BeginPlay()
+{
+	Super::BeginPlay();
+}
 
 void ASoldier::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
 {
@@ -362,4 +371,5 @@ void ASoldier::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME(ASoldier, bIsAiming);
 	DOREPLIFETIME(ASoldier, bIsReloading);
 	DOREPLIFETIME(ASoldier, bIsCrouching);
+	DOREPLIFETIME(ASoldier, bCanSwitchWeapons);
 }

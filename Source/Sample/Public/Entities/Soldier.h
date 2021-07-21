@@ -23,10 +23,12 @@ public:
 
   	/** Use the selected item -- usage is determined by the item itself */
   	UFUNCTION(BlueprintCallable)
-  	void UseItem(class UEquipableItem* Item);
+  	void UseItem(class AEquipableItem* Item);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void CheckRayCastActor(AActor* Actor);
+
+	FORCEINLINE class USceneComponent* GetWeaponHolder() const { return WeaponHolder; }
 
 
 ////////////////////////////** --------------- Entity Stat System Interface --------------- **//////////////////////////////////
@@ -61,18 +63,26 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ResetFire() { bCanFire = true; }
 
+	/** Blueprint function to play fire montage */
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnGunStartFire(class AGun* Gun);
+
 	/** ----------- ADS ------------ **/
 
-	/** Starts the process of ADSing -- Input Action */
 	UFUNCTION(Server, Reliable)
+	void ServerADS();
+
+	/** Starts the process of ADSing -- Input Action */
 	void ADS();
 
 	/** ADS Start blueprint functionality */
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnStartADS();
 
-	/** Stops the process of ADSing -- Input Action */
 	UFUNCTION(Server, Reliable)
+	void ServerStopADS();
+
+	/** Stops the process of ADSing -- Input Action */
 	void StopADS();
 
 	/** ADS Stop blueprint functionality */
@@ -90,7 +100,7 @@ protected:
 	void StartReload();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnGunStartReload(class UGun* Gun);
+	void OnGunStartReload(class AGun* Gun);
 
 	UFUNCTION(BlueprintCallable)
 	void FinishReload();
@@ -104,11 +114,17 @@ protected:
 ////////////////////////////** --------------- Weapon Swap --------------- **//////////////////////////////////
 
 
+	UFUNCTION(Server, Reliable)
+	void ServerSwitchWeapon(int32 Index);
+
 	/** Switches to the player's next gun -- Input Action */
 	void NextWeapon();
 
 	/** Switches to the player's next gun -- Input Action */
 	void PreviousWeapon();
+
+	UFUNCTION(BlueprintCallable)
+	void ResetCanSwap() { bCanSwitchWeapons = true; }
 
 
 ////////////////////////////** --------------- Movement --------------- **//////////////////////////////////
@@ -147,12 +163,17 @@ protected:
 
 ////////////////////////////** --------------- Function Overrides --------------- **//////////////////////////////////
 
+	/** Called at the start of the game */
+	virtual void BeginPlay() override;
 
 	/** Override the player input */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	/** Network replication */
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void TestFunction();
 
 
 /** --------------- Fields --------------- **/
@@ -187,10 +208,10 @@ protected:
 	bool bCanFire;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
-	bool bIsAiming;
+	bool bCanSwitchWeapons;
 
-	UPROPERTY(BlueprintReadOnly)
-	bool bCanReload;
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	bool bIsAiming;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	bool bIsReloading;
@@ -203,7 +224,7 @@ protected:
 	class USceneComponent* WeaponHolder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	class USkeletalMeshComponent* WeaponMesh;
+	class UChildActorComponent* WeaponActor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class UEquipmentComponent* EquipmentComponent;

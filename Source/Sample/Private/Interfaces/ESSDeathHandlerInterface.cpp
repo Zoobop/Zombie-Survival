@@ -5,7 +5,3 @@
 
 // Add default functionality here for any IESSDeathHandlerInterface functions that are not pure virtual.
 
-void IESSDeathHandlerInterface::HandleDeath()
-{
-	//Execute_OnHandleDeath(Owner);
-}

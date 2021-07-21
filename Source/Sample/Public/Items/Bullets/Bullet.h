@@ -18,7 +18,7 @@ public:
 	ABullet();
 
  	/** Sets the bullet values according to the owning gun */
- 	void SetUpBullet(class UGun* Gun);
+ 	void SetUpBullet(class AGun* Gun);
 
 	/** Allows for obtaining stat attribute modifiers through interface */
 	class UStatAttributeModifier* GetStatAttributeModifier() override;
@@ -37,7 +37,7 @@ protected:
 	class UProjectileMovementComponent* BulletMovement;
 
  	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Bullet")
- 	class UGun* OwningGun;
+ 	class AGun* OwningGun;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Bullet|StatAttributeModifier")
 	class UStatAttributeModifier* StatAttributeModifier;
