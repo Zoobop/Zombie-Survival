@@ -29,13 +29,23 @@ class SAMPLE_API UStatAttributeModifier : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	UStatAttributeModifier();
 
 	void ApplyModification(class UStatAttribute* StatAttribute);
+
+	void SetupModifier(int32 Amount, EModificationType MODType, EOperationType OPType, FName Tag);
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnApplyModification();
 
+	/** Returns the Stat Attribute Tag */
 	FORCEINLINE FName GetStatAttributeTag() const { return StatAttributeTag; }
+	/** Returns the modification amount */
+	FORCEINLINE int32 GetModificationAmount() const { return ModificationAmount; }
+	/** Returns the modification type */
+	FORCEINLINE EModificationType GetModificationType() const { return ModificationType; }
+	/** Returns the operation type */
+	FORCEINLINE EOperationType GetOperationType() const { return OperationType; }
 
 protected:
 

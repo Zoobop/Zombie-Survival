@@ -2,9 +2,15 @@
 
 
 #include "Entities/EntityStatComponent.h"
+#include "Entities/Undead.h"
+#include "Entities/Soldier.h"
+#include "Entities/EntityState.h"
 #include "StatAttributes/StatAttributeSet.h"
 #include "StatAttributes/StatAttribute.h"
 #include "StatAttributes/StatAttributeModifier.h"
+#include "Net/UnrealNetwork.h"
+#include "Gamemodes/SurvivalGameState.h"
+#include "Gamemodes/SurvivalMode.h"
 
 // Sets default values for this component's properties
 UEntityStatComponent::UEntityStatComponent()
@@ -18,7 +24,6 @@ UEntityStatComponent::UEntityStatComponent()
 	}
 }
 
-
 void UEntityStatComponent::SoldierDefaults()
 {
 	Name = FText::FromString("New Soldier");
@@ -31,7 +36,7 @@ void UEntityStatComponent::UndeadDefaults()
 	Faction = EFaction::FACTION_UNDEAD;
 }
 
-void UEntityStatComponent::ApplyStatAttributeModifiers(TArray<class UStatAttributeModifier*> Modifiers)
+void UEntityStatComponent::ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers)
 {
 	/** Validate Stat Attribute Set and add all the modifiers to the Stat Attribute Set */
 	if (StatAttributeSet) {
@@ -46,23 +51,43 @@ void UEntityStatComponent::ApplyStatAttributeModifiers(TArray<class UStatAttribu
 					/** Apply the modifier */
 					Modifier->ApplyModification(StatAttribute);
 
-					/** Update the Attribute changes */
-					OnStatAttributeChanged.Broadcast(StatAttribute);
-
 					/** Check for the attribute death flags */
 					CheckForDeath(StatAttribute);
 				}
 			}
+
+			/** Update the Attribute changes */
+			OnStatAttributeChanged.Broadcast(StatAttribute);
 		}
 
 		StatAttributeSet->ClearModifiers();
 	}
 }
 
+void UEntityStatComponent::SetDamageDealer(class AEntity* Attacker)
+{
+	if (Attacker) {
+		DamageDealer = Attacker;
+		DamageDealer->OnEntityHit();
+	}
+}
+
+void UEntityStatComponent::OnRep_Killer()
+{
+	OnHandleDeath.Broadcast(Killer);
+	AEntity* EntityOwner = Cast<AEntity>(GetOwner());
+	EntityOwner->Ragdoll();
+	Killer->OnEntityKilled();
+	//Killer->SendDeathData(EntityOwner);
+}
+
 void UEntityStatComponent::HandleDeath()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Entity has died!"))
-	OnHandleDeath.Broadcast();
+	if (DamageDealer) {
+		Killer = DamageDealer;
+		OnRep_Killer();
+	}
 }
 
 bool UEntityStatComponent::CheckForDeath(class UStatAttribute* AssociatedStatAttribute)
@@ -80,6 +105,14 @@ bool UEntityStatComponent::CheckForDeath(class UStatAttribute* AssociatedStatAtt
 	}
 
 	return false;
+}
+
+void UEntityStatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UEntityStatComponent, Killer);
+	DOREPLIFETIME(UEntityStatComponent, DamageDealer);
 }
 
 // Called when the game starts

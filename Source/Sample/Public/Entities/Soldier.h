@@ -6,9 +6,6 @@
 #include "Entities/Entity.h"
 #include "Soldier.generated.h"
 
-/** Blueprints will bind to this event to do additional effects after the gun is fired */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGunFired, FHitResult, HitResult);
-
 /** Event to call when reloading */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGunReloaded);
 
@@ -25,19 +22,12 @@ public:
   	UFUNCTION(BlueprintCallable)
   	void UseItem(class AEquipableItem* Item);
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void CheckRayCastActor(AActor* Actor);
+	virtual void SendDeathData(AEntity* Killed) override;
+
+	/** Starts to reload if magazine is empty */
+	void CheckReload();
 
 	FORCEINLINE class USceneComponent* GetWeaponHolder() const { return WeaponHolder; }
-
-
-////////////////////////////** --------------- Entity Stat System Interface --------------- **//////////////////////////////////
-
-	/** Call for the entity to receive stat attribute modification */
-	void ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers) override;
-
-	/** Call for the entity to apply stat attribute modification */
-	TArray<class UStatAttributeModifier*> ApplyStatAttributeModification() override;
 
 protected:
 
@@ -62,10 +52,6 @@ protected:
 	/** Resets the bCanFire boolean */
 	UFUNCTION(BlueprintCallable)
 	void ResetFire() { bCanFire = true; }
-
-	/** Blueprint function to play fire montage */
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnGunStartFire(class AGun* Gun);
 
 	/** ----------- ADS ------------ **/
 
@@ -124,7 +110,7 @@ protected:
 	void PreviousWeapon();
 
 	UFUNCTION(BlueprintCallable)
-	void ResetCanSwap() { bCanSwitchWeapons = true; }
+	void ResetWeaponSwap();
 
 
 ////////////////////////////** --------------- Movement --------------- **//////////////////////////////////
@@ -171,9 +157,6 @@ protected:
 
 	/** Network replication */
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void TestFunction();
 
 
 /** --------------- Fields --------------- **/
@@ -233,17 +216,8 @@ protected:
 	/** --------------- Events --------------- **/
 
 
-	/** Event to add more functionality after fire */
-	UPROPERTY(BlueprintAssignable)
-	FOnGunFired OnGunFired;
-
 	/** Event to add more functionality to reloading */
 	UPROPERTY(BlueprintAssignable)
 	FOnGunReloaded OnGunReloaded;
 
-
-private:
-
-	/** Timer that handles the re-firing of a gun */
-	FTimerHandle TimeHandle_HandleRefire;
 };

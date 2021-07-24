@@ -4,6 +4,12 @@
 #include "StatAttributes/StatAttributeModifier.h"
 #include "StatAttributes/StatAttribute.h"
 
+
+UStatAttributeModifier::UStatAttributeModifier()
+{
+
+}
+
 void UStatAttributeModifier::ApplyModification(class UStatAttribute* StatAttribute)
 {
 	switch (ModificationType)
@@ -39,4 +45,12 @@ void UStatAttributeModifier::ApplyModification(class UStatAttribute* StatAttribu
 	default:
 		break;
 	}
+}
+
+void UStatAttributeModifier::SetupModifier(int32 Amount, EModificationType MODType, EOperationType OPType, FName Tag)
+{
+	ModificationAmount = Amount;
+	ModificationType = MODType;
+	OperationType = OPType;
+	StatAttributeTag = Tag;
 }

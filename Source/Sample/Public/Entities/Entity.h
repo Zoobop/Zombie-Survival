@@ -20,11 +20,24 @@ public:
 	/** Allows for safe referencing without Actor casting */
 	class UEntityStatComponent* GetEntityStatComponent() override;
 
-	/** Call when receiving damage from another entity */
-	void ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers) override;
+	/** Causes rag doll */
+	void Ragdoll();
 
-	/** Call when applying damage to another entity */
-	TArray<class UStatAttributeModifier*> ApplyStatAttributeModification() override;
+	/** Sends death information to the gamemode */
+	virtual void SendDeathData(AEntity* Killed) PURE_VIRTUAL(AEntity, );
+
+	/** Retrieve current points */
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnRetrievePoints(int32 Points);
+
+	UFUNCTION(Server, Reliable)
+	void ServerOnEntityHit();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnEntityHit();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnEntityKilled();
 
 	/** Allow for replication */
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

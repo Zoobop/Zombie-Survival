@@ -7,9 +7,6 @@
 #include "SurvivalMode.generated.h"
 
 
-/** Singleton */
-const static ASurvivalMode* Instance;
-
 UCLASS()
 class SAMPLE_API ASurvivalMode : public AGameModeBase
 {
@@ -18,9 +15,15 @@ class SAMPLE_API ASurvivalMode : public AGameModeBase
 public:
 	ASurvivalMode();
 
-	void UndeadDied(class AUndead* Killed, class ASoldier* Killer);
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 
 	void PlayerDied(class ASoldier* Killed);
+
+	void UndeadDied(class AUndead* Killed, class ASoldier* Killer);
+
+	void AddSpawnLocation(class AUndeadSpawnPoint* SpawnPoint);
+
+	FORCEINLINE TArray<class AEntityController*> GetAlivePlayers() const { return AlivePlayers; }
 
 protected:
 
@@ -29,18 +32,20 @@ protected:
 
 protected:
 
-	/** Round number */
-	int32 RoundNumber;
-
 	/** Number of undead at a time in the map */
+	UPROPERTY(Transient, BlueprintReadOnly)
 	int32 MaxSpawnedUndead;
 
 	/** Current players in the game */
-	TArray<class ASoldier*> Survivors;
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<class AEntityController*> AlivePlayers;
 
 	/** Current undead in the game */
-	TArray<class AUndead*> CurrentUndead;
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<class AEntityController*> CurrentUndead;
 
 	/** Locations the undead can spawn */
-	TArray<int32> UndeadSpawnLocations;
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<class AUndeadSpawnPoint*> UndeadSpawnLocations;
+
 };

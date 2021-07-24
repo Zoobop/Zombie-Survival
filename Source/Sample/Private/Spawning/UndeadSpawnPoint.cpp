@@ -2,26 +2,28 @@
 
 
 #include "Spawning/UndeadSpawnPoint.h"
+#include "Gamemodes/SurvivalMode.h"
+#include "Components/BoxComponent.h"
 
 // Sets default values
 AUndeadSpawnPoint::AUndeadSpawnPoint()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	BoxCollision = CreateDefaultSubobject<UBoxComponent>("BoxCollision");
+	BoxCollision->bEditableWhenInherited = true;
+	BoxCollision->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
 void AUndeadSpawnPoint::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ValidateSpawnPoint();
 	
 }
 
-// Called every frame
-void AUndeadSpawnPoint::Tick(float DeltaTime)
+void AUndeadSpawnPoint::ValidateSpawnPoint()
 {
-	Super::Tick(DeltaTime);
-
+	Cast<ASurvivalMode>(GetWorld()->GetAuthGameMode())->AddSpawnLocation(this);
 }
 

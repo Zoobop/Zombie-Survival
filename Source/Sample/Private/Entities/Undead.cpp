@@ -10,11 +10,6 @@ AUndead::AUndead()
 	GetEntityStatComponent()->UndeadDefaults();
 }
 
-void AUndead::ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers)
-{
-	GetEntityStatComponent()->ApplyStatAttributeModifiers(Modifiers);
-}
-
 TArray<class UStatAttributeModifier*> AUndead::ApplyStatAttributeModification()
 {
 	TArray<class UStatAttributeModifier*> Modifiers;

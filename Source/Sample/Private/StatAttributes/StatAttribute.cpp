@@ -50,5 +50,6 @@ void UStatAttribute::ModifyInfinteBonusValue(int32 Value)
 
 void UStatAttribute::SetOwningStatAttributeSet(class UStatAttributeSet* StatAttributeSet)
 {
-	OwningStatAttributeSet = StatAttributeSet;
+	if (StatAttributeSet)
+		OwningStatAttributeSet = StatAttributeSet;
 }

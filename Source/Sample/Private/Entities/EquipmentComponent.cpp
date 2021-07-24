@@ -196,3 +196,8 @@ void UEquipmentComponent::WeaponSetup()
 		OnEquipmentChanged.Broadcast();
 	}
 }
+
+void UEquipmentComponent::OnRep_WeaponChanged()
+{
+	
+}

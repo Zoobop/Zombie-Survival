@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Interfaces/ESSDeathHandlerInterface.h"
+#include "Interfaces/ESSModifierReceptionInterface.h"
 #include "EntityStatComponent.generated.h"
 
 
@@ -20,7 +21,7 @@ enum struct EFaction : uint8
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatAttributeChanged, class UStatAttribute*, StatAttribute);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class SAMPLE_API UEntityStatComponent : public UActorComponent, public IESSDeathHandlerInterface
+class SAMPLE_API UEntityStatComponent : public UActorComponent, public IESSDeathHandlerInterface, public IESSModifierReceptionInterface
 {
 	GENERATED_BODY()
 
@@ -35,14 +36,25 @@ public:
 	/** Set Undead default values */
 	void UndeadDefaults();
 
-	/** Applies the Stat Modification Modifier values to the component */
-	void ApplyStatAttributeModifiers(TArray<class UStatAttributeModifier*> Modifiers);
+	/** Call when receiving damage from another entity */
+	void ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers) override;
+
+	/** Set your killer */
+	UFUNCTION(BlueprintCallable)
+	void SetDamageDealer(class AEntity* Attacker);
+
+	/** Called when Killer changes */
+	UFUNCTION()
+	virtual void OnRep_Killer();
 
 	/** Handles the entities death */
 	void HandleDeath() override;
 
 	/** Checks the associated stat attribute if dead */
 	bool CheckForDeath(class UStatAttribute* AssociatedStatAttribute) override;
+
+	/** Replication */
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	/** Returns the faction of the entity */
 	FORCEINLINE EFaction GetFaction() const { return Faction; }
@@ -70,6 +82,13 @@ protected:
 	/** Entity Stats */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "GeneralInfo")
 	class UStatAttributeSet* StatAttributeSet;
+
+	/** Entity who kills you */
+	UPROPERTY(ReplicatedUsing = "OnRep_Killer")
+	AEntity* Killer;
+
+	UPROPERTY(BlueprintReadWrite, Replicated)
+	AEntity* DamageDealer;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnStatAttributeChanged OnStatAttributeChanged;

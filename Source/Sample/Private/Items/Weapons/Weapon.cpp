@@ -14,3 +14,14 @@ AWeapon::AWeapon()
 	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
 	SkeletalMeshComponent->AttachTo(WeaponBase);
 }
+
+TArray<class UStatAttributeModifier*> AWeapon::ApplyStatAttributeModification()
+{
+	TArray<class UStatAttributeModifier*> Modifiers;
+	return Modifiers;
+}
+
+class UStatAttributeModifier* AWeapon::GetStatAttributeModifier()
+{
+	return nullptr;
+}

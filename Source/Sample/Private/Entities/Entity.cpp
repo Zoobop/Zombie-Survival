@@ -57,15 +57,22 @@ class UEntityStatComponent* AEntity::GetEntityStatComponent()
 	return EntityStatComponent;
 }
 
-void AEntity::ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers)
+void AEntity::Ragdoll()
 {
-	
+	/** Makes the entity rag doll */
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCharacterMovement()->DisableMovement();
+
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetMesh()->SetCollisionResponseToAllChannels(ECR_Block);
+
+	SetLifeSpan(10.0f);
 }
 
-TArray<class UStatAttributeModifier*> AEntity::ApplyStatAttributeModification()
+void AEntity::ServerOnEntityHit_Implementation()
 {
-	TArray<class UStatAttributeModifier*> Modifiers;
-	return Modifiers;
+	OnEntityHit();
 }
 
 void AEntity::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -136,8 +143,8 @@ void AEntity::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AEntity::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AEntity::MoveRight);

@@ -7,7 +7,7 @@
 #include "ESSDeathHandlerInterface.generated.h"
 
 /** Blueprints will bind to this event to handle additional functionality on death */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHandleDeath);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHandleDeath, class AEntity*, Killer);
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)

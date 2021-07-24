@@ -58,6 +58,9 @@ protected:
 	/** Spawn weapon actors into the world */
 	void WeaponSetup();
 
+	UFUNCTION()
+	void OnRep_WeaponChanged();
+
 	/** Network replication */
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -81,7 +84,7 @@ protected:
   	TMap<uint8, class AArmor*> EquippedArmor;
   
   	/** Current Weapon */
-  	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Equipment", Replicated)
+  	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Equipment", ReplicatedUsing = "OnRep_WeaponChanged")
     class AGun* CurrentWeapon;
 
 	/** Event to update UI */

@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "EntityStatSystemInterface.generated.h"
+#include "ESSModifierReceptionInterface.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI, BlueprintType)
-class UEntityStatSystemInterface : public UInterface
+UINTERFACE(MinimalAPI)
+class UESSModifierReceptionInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,14 +16,14 @@ class UEntityStatSystemInterface : public UInterface
 /**
  * 
  */
-class SAMPLE_API IEntityStatSystemInterface
+class SAMPLE_API IESSModifierReceptionInterface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	/** Allows for safe referencing without Actor casting */
+	/** Call when receiving damage from another entity */
 	UFUNCTION()
-	virtual class UEntityStatComponent* GetEntityStatComponent() = 0;
+	virtual void ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers) = 0;
 };

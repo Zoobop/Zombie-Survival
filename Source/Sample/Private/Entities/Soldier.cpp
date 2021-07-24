@@ -15,6 +15,7 @@
 #include "Items/Bullets/Bullet.h"
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
+#include "Gamemodes/SurvivalMode.h"
 
 ASoldier::ASoldier()
 {
@@ -52,43 +53,31 @@ void ASoldier::UseItem(class AEquipableItem* Item)
   	Item->OnUse(this);
 }
 
-void ASoldier::ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers)
+void ASoldier::SendDeathData(AEntity* Killed)
 {
-	/** Send modifiers through Entity Stat Component */
-	GetEntityStatComponent()->ApplyStatAttributeModifiers(Modifiers);
+	if (HasAuthority()) {
+		if (AUndead* Undead = Cast<AUndead>(Killed)) {
+			if (ASurvivalMode* GameMode = Cast<ASurvivalMode>(GetWorld()->GetAuthGameMode())) {
+
+				GameMode->UndeadDied(Undead, this);
+			}
+		}
+	}
 }
 
-TArray<class UStatAttributeModifier*> ASoldier::ApplyStatAttributeModification()
+void ASoldier::CheckReload()
 {
-	TArray<class UStatAttributeModifier*> Modifiers;
-
-	/** Validate current weapon */
-	if (EquipmentComponent->GetCurrentWeapon()) {
-
-		AGun* Gun = EquipmentComponent->GetCurrentWeapon();
-
-		/** Add Gun's stat modifier */
-		Modifiers.Add(Gun->GetStatAttributeModifier());
-
-		/** Add any of the ammo types' stat modifiers */
-		class UStatAttributeModifier* BulletModifier = Gun->GetAmmoType().GetDefaultObject()->GetStatAttributeModifier();
-
-		/** Validate bullet modifier */
-		if (BulletModifier)
-			Modifiers.Add(BulletModifier);
+	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {		
+		if (!Gun->HasBulletsToFire() && !Gun->HasNoAmmo()) {
+			StartReload();
+		}
 	}
-
-	return Modifiers;
 }
 
 void ASoldier::UseCurrentGun()
 {
-	AGun* Gun = EquipmentComponent->GetCurrentWeapon();
-
-	if (Gun) {
-		if (Gun->Fire()) {
-			StartReload();
-		}
+	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
+		Gun->ShootGun();
 	}
 }
 
@@ -263,6 +252,8 @@ void ASoldier::ServerSwitchWeapon_Implementation(int32 Index)
 	if (bCanSwitchWeapons) {
 		EquipmentComponent->ServerPrepWeaponSwap(Index);
 		bCanSwitchWeapons = false;
+		bIsReloading = false;
+		EquipmentComponent->GetCurrentWeapon()->SetFire(false);
 	}
 }
 
@@ -276,6 +267,8 @@ void ASoldier::NextWeapon()
 			/** Adds plus 1 to the current weapon index */
 			EquipmentComponent->PrepWeaponSwap(1);
 			bCanSwitchWeapons = false;
+			bIsReloading = false;
+			EquipmentComponent->GetCurrentWeapon()->SetFire(false);
 		}
 	}
 }
@@ -290,22 +283,30 @@ void ASoldier::PreviousWeapon()
 			/** Adds negative 1 to the current weapon index */
 			EquipmentComponent->PrepWeaponSwap(-1);
 			bCanSwitchWeapons = false;
+			bIsReloading = false;
+			EquipmentComponent->GetCurrentWeapon()->SetFire(false);
 		}
+	}
+}
+
+void ASoldier::ResetWeaponSwap()
+{
+	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
+		bCanSwitchWeapons = true;
+		bIsReloading = true;
+		Gun->SetFire(true);
 	}
 }
 
 void ASoldier::ServerOnFire_Implementation()
 {
 	UseCurrentGun();
-
-	/** Start Timer */
-	GetWorldTimerManager().SetTimer(TimeHandle_HandleRefire, this, &ASoldier::UseCurrentGun, EquipmentComponent->GetCurrentWeapon()->GetFireRate(), true);
 }
 
 void ASoldier::ServerStopFire_Implementation()
 {
 	/** Stop Timer */
-	GetWorldTimerManager().ClearTimer(TimeHandle_HandleRefire);
+	EquipmentComponent->GetCurrentWeapon()->StopFiring();
 }
 
 void ASoldier::StartFire()
@@ -320,9 +321,6 @@ void ASoldier::StartFire()
 		else {
 			/** Fire weapon */
 			UseCurrentGun();
-
-			/** Start Timer */
-			GetWorldTimerManager().SetTimer(TimeHandle_HandleRefire, this, &ASoldier::UseCurrentGun, EquipmentComponent->GetCurrentWeapon()->GetFireRate(), true);
 		}
 	}
 }
@@ -334,7 +332,7 @@ void ASoldier::StopFire()
 	}
 	else {
 		/** Stop Timer */
-		GetWorldTimerManager().ClearTimer(TimeHandle_HandleRefire);
+		EquipmentComponent->GetCurrentWeapon()->StopFiring();
 	}
 }
 

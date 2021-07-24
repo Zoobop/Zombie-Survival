@@ -4,12 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Items/Weapons/Weapon.h"
-#include "Interfaces/ESSModifierHandlerInterface.h"
 #include "Gun.generated.h"
 
 
+/** Blueprints will bind to this event to do additional effects after the gun is fired */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGunFired);
+
 UCLASS(Blueprintable, BlueprintType)
-class SAMPLE_API AGun : public AWeapon, public IESSModifierHandlerInterface
+class SAMPLE_API AGun : public AWeapon
 {
 	GENERATED_BODY()
 
@@ -26,9 +28,12 @@ public:
 	/** Set the owner of the gun */
 	void SetGunOwner(class AEntity* Owner);
 
+	UFUNCTION()
+	void ShootGun();
+
 	/** Fires the gun and returns if the gun needs to reload */
 	UFUNCTION()
-	bool Fire();
+	void Fire();
 
 	UFUNCTION()
 	void SetFire(bool State);
@@ -40,6 +45,15 @@ public:
 	/** Decrements the current amount of bullets in clip/magazine and returns if there are bullets remaining */
 	UFUNCTION()
 	bool PostFireCheck();
+
+	UFUNCTION()
+	void StopFiring();
+
+
+////////////////////////////** --------------- Entity Stat System Interface --------------- **//////////////////////////////////
+
+	/** Call to apply stat attribute modification */
+	TArray<class UStatAttributeModifier*> ApplyStatAttributeModification() override;
 
 	/** Allows for obtaining stat attribute modifiers through interface */
 	class UStatAttributeModifier* GetStatAttributeModifier() override;
@@ -64,7 +78,7 @@ public:
 	FORCEINLINE bool HasBulletsToFire() const { return CurrentMagazineAmmo > 0; }
 	/** Returns if the current magazine is full */
 	FORCEINLINE bool IsMagazineFull() const { return CurrentMagazineAmmo == DefaultAmmoPerMagazine; }
-	/** Returns if the current magazine is full */
+	/** Returns if the gun has no more ammo at all*/
 	FORCEINLINE bool HasNoAmmo() const { return CurrentMagazineAmmo == 0 && CurrentAmmoReserves == 0; }
 	/** Returns the fire animation */
 	FORCEINLINE float GetReloadTime() const { return DefaultReloadTime; }
@@ -82,20 +96,27 @@ protected:
 	/** Checks if the gun is currently able to shoot */
 	void CheckFire();
 
-	/** Blueprint functionality when the gun fires */
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void OnGunFired(class AEntity* GunOwner, FVector FireLocation);
+	/** Calculates the gun's damage based on distance and hit location */
+	UFUNCTION(BlueprintCallable)
+	TArray<class UStatAttributeModifier*> CalculateHit(FHitResult Hit);
+
+	/** Blueprint function to play fire montage */
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnGunStartFire(class AEntity* GunOwner);
 
 	/** Blueprint functionality when an entity it hit */
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void OnEntityHit(class AEntity* GunOwner, FHitResult Hit);
+	void OnEntityHit(class AEntity* GunOwner, int32 Damage, FHitResult Hit);
+
+private:
+
 
 /** --------------- Fields --------------- **/
 protected:
 	/** --------------- General --------------- **/
 
 	/** Owner of the gun */
-	class AEntity* Player;
+	class ASoldier* Player;
 
 	/** Fire location socket */
 	UPROPERTY(BlueprintReadOnly)
@@ -111,9 +132,17 @@ protected:
 
 	/** --------------- Gun Specifics --------------- **/
 
-	/** Base weapon Stat Modifier */
+// 	/** Base weapon Stat Modifier */
+// 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|StatModifiers")
+// 	class UStatAttributeModifier* StatAttributeModifier;
+
+	/** Modifier Tag */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|StatModifiers")
-	class UStatAttributeModifier* StatAttributeModifier;
+	FName Tag = "Health";
+
+	/** Base gun damage -- damage value gets applied to the stat modifier */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 0))
+	int32 DefaultDamage = 40;
 
 	/** The gun's shooting type */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General")
@@ -146,6 +175,10 @@ protected:
 	/** Base range where after the bullet reaches this distance away from the firing, the damage will be reduce by the damage fall-off amount */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 1))
 	float DefaultDamageFallOffRange = 1;
+
+	/** Distance between damage fall-off intervals */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 1))
+	float DefaultDistanceBetweenIntervals = 10.0f;
 
 	/** Base damage fall-off amount past the damage fall-off range */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|General", meta = (ClampMin = 1))
@@ -183,8 +216,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|Animations")
 	class UAnimMontage* EquipAnimation;
 
+	/** Event to update UI and play effects */
+	UPROPERTY(BlueprintAssignable)
+	FOnGunFired OnGunFired;
+
 private:
 
+	/** Bool responsible for allowing firing */
 	bool bCanFire;
+
+	/** Timer that handles the re-firing of a gun */
+	FTimerHandle TimeHandle_HandleRefire;
+
 };
 

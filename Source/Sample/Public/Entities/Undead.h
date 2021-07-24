@@ -4,19 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Entities/Entity.h"
+#include "Interfaces/ESSModifierApplicationInterface.h"
 #include "Undead.generated.h"
 
 
 UCLASS(BlueprintType)
-class SAMPLE_API AUndead : public AEntity
+class SAMPLE_API AUndead : public AEntity, public IESSModifierApplicationInterface
 {
 	GENERATED_BODY()
 	
 public:
 	AUndead();
-
-	/** Call when receiving damage from another entity */
-	void ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers) override;
 
 	/** Call when applying damage to another entity */
 	TArray<class UStatAttributeModifier*> ApplyStatAttributeModification() override;

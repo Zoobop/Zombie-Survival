@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Items/EquipableItem.h"
+#include "Interfaces/ESSModifierApplicationInterface.h"
+#include "Interfaces/ESSModifierHandlerInterface.h"
 #include "Weapon.generated.h"
 
 UENUM(BlueprintType)
@@ -16,7 +18,7 @@ enum struct EWeaponType : uint8
 };
 
 UCLASS(Abstract, Blueprintable, BlueprintType)
-class SAMPLE_API AWeapon : public AEquipableItem
+class SAMPLE_API AWeapon : public AEquipableItem, public IESSModifierHandlerInterface, public IESSModifierApplicationInterface
 {
 	GENERATED_BODY()
 
@@ -30,6 +32,12 @@ public:
 
 	/** Call this function to prep the weapon for use if needed */
 	virtual void LoadBullets() PURE_VIRTUAL(AWeapon, );
+
+	/** Call to apply stat attribute modification */
+	TArray<class UStatAttributeModifier*> ApplyStatAttributeModification() override;
+
+	/** Allows for obtaining stat attribute modifiers through interface */
+	class UStatAttributeModifier* GetStatAttributeModifier() override;
 
 	/** Returns the weapon type */
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
