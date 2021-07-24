@@ -37,9 +37,6 @@ public:
   	/** Switch weapon index to the new index */
 	void PrepWeaponSwap(int32 ValueChange);
 
-	UFUNCTION(Server, Reliable)
-  	void ServerPrepWeaponSwap(int32 ValueChange);
-
   	/** Returns the current weapon */
   	FORCEINLINE class AGun* GetCurrentWeapon() const { return CurrentWeapon; }
 
@@ -47,6 +44,12 @@ protected:
 
  	/** Spawns the weapon into the world */
 	class AGun* HandleWeaponSpawn(TSubclassOf<class AGun> Gun);
+
+	/** Spawns the melee weapon into the world */
+	class AMelee* HandleMeleeSpawn(TSubclassOf<class AMelee> Melee);
+
+	/** Spawns the armor into the world */
+	class AArmor* HandleArmorSpawn(TSubclassOf<class AArmor> Armor);
 
 	/** Switch out weapons */
 	UFUNCTION(BlueprintCallable)
@@ -58,6 +61,9 @@ protected:
 	/** Spawn weapon actors into the world */
 	void WeaponSetup();
 
+	/** Spawn armor actors into the world */
+	void ArmorSetup();
+
 	UFUNCTION()
 	void OnRep_WeaponChanged();
 
@@ -67,6 +73,8 @@ protected:
 /** --------------- Fields --------------- **/
 protected:
 
+	class ASoldier* Player;
+
   	/** List of weapons to give to the player at the start of the game */
   	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Equipment")
   	TArray<TSubclassOf<class AGun>> DefaultWeapons;
@@ -75,6 +83,22 @@ protected:
   	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Equipment")
   	TMap<uint8, TSubclassOf<class AArmor>> DefaultArmor;
   
+	/** List of lethals to give to the player at the start of the game */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	TArray<TSubclassOf<class ALethal>> DefaultLethals;
+
+	/** List of tacticals to give to the player at the start of the game */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	TArray<TSubclassOf<class ATactical>> DefaultTacticals;
+
+	/** List of consumables to give to the player at the start of the game */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	TArray<TSubclassOf<class AConsumable>> DefaultConsumables;
+
+	/** Starting melee weapon */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	TSubclassOf<class AMelee> DefaultMelee;
+
   	/** Currently equipped weapons */
   	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
   	TArray<class AGun*> EquippedWeapons;
@@ -82,10 +106,22 @@ protected:
   	/** Currently equipped armor */
   	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
   	TMap<uint8, class AArmor*> EquippedArmor;
+
+	/** Currently equipped lethals */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
+	TArray<class ALethal*> EquippedLethals;
   
+	/** Currently equipped tacticals */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
+	TArray<class ATactical*> EquippedTacticals;
+
   	/** Current Weapon */
-  	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Equipment", ReplicatedUsing = "OnRep_WeaponChanged")
+  	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Equipment", Replicated)
     class AGun* CurrentWeapon;
+
+	/** Current Melee */
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Equipment", Replicated)
+	class AMelee* CurrentMelee;
 
 	/** Event to update UI */
 	UPROPERTY(BlueprintAssignable, Category = "Equipment")
@@ -98,6 +134,6 @@ protected:
 private:
 
 	/** Current weapon index */
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = "OnRep_WeaponChanged")
 	int32 WeaponIndex;
 };

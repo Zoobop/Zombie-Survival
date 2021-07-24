@@ -12,7 +12,7 @@ AWeapon::AWeapon()
 	SetRootComponent(WeaponBase);
 
 	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>("WeaponMesh");
-	SkeletalMeshComponent->AttachTo(WeaponBase);
+	SkeletalMeshComponent->SetupAttachment(WeaponBase);
 }
 
 TArray<class UStatAttributeModifier*> AWeapon::ApplyStatAttributeModification()

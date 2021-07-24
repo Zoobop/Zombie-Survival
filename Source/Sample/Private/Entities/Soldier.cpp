@@ -30,6 +30,13 @@ ASoldier::ASoldier()
 	WeaponHolder->SetupAttachment(GetMesh(), "EquipSlot");
 	WeaponActor->SetupAttachment(WeaponHolder);
 
+	/** Melee Holder and Mesh */
+	MeleeHolder = CreateDefaultSubobject<USceneComponent>("MeleeHolder");
+	MeleeActor = CreateDefaultSubobject<UChildActorComponent>("MeleeActor");
+
+	MeleeHolder->SetupAttachment(GetMesh(), "MeleeSlot");
+	MeleeActor->SetupAttachment(MeleeHolder);
+
 	/** Set game play capabilities */
 	bCanSwitchWeapons = true;
 	bCanFire = true;
@@ -65,21 +72,7 @@ void ASoldier::SendDeathData(AEntity* Killed)
 	}
 }
 
-void ASoldier::CheckReload()
-{
-	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {		
-		if (!Gun->HasBulletsToFire() && !Gun->HasNoAmmo()) {
-			StartReload();
-		}
-	}
-}
-
-void ASoldier::UseCurrentGun()
-{
-	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
-		Gun->ShootGun();
-	}
-}
+////////////////////////////** --------------- Movement --------------- **//////////////////////////////////
 
 void ASoldier::StartSprint()
 {
@@ -138,6 +131,8 @@ void ASoldier::StopCrouch_Implementation()
 	GetCharacterMovement()->MaxWalkSpeed += CrouchSpeedAmount;
 }
 
+
+
 void ASoldier::ServerStartReload_Implementation()
 {
 	AGun* Gun = EquipmentComponent->GetCurrentWeapon();
@@ -188,6 +183,17 @@ void ASoldier::FinishReload()
 	
 	OnGunReloaded.Broadcast();
 }
+
+void ASoldier::CheckReload()
+{
+	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {		
+		if (!Gun->HasBulletsToFire() && !Gun->HasNoAmmo()) {
+			StartReload();
+		}
+	}
+}
+
+
 
 void ASoldier::ServerADS_Implementation()
 {
@@ -247,10 +253,12 @@ void ASoldier::StopADS()
 	}
 }
 
+////////////////////////////** --------------- Weapon Swap --------------- **//////////////////////////////////
+
 void ASoldier::ServerSwitchWeapon_Implementation(int32 Index)
 {
 	if (bCanSwitchWeapons) {
-		EquipmentComponent->ServerPrepWeaponSwap(Index);
+		EquipmentComponent->PrepWeaponSwap(Index);
 		bCanSwitchWeapons = false;
 		bIsReloading = false;
 		EquipmentComponent->GetCurrentWeapon()->SetFire(false);
@@ -298,6 +306,8 @@ void ASoldier::ResetWeaponSwap()
 	}
 }
 
+
+
 void ASoldier::ServerOnFire_Implementation()
 {
 	UseCurrentGun();
@@ -335,6 +345,15 @@ void ASoldier::StopFire()
 		EquipmentComponent->GetCurrentWeapon()->StopFiring();
 	}
 }
+
+void ASoldier::UseCurrentGun()
+{
+	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
+		Gun->ShootGun();
+	}
+}
+
+
 
 void ASoldier::BeginPlay()
 {

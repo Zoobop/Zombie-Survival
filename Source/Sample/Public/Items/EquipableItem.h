@@ -11,7 +11,7 @@ enum struct EEquipableType : uint8
 {
 	EQTYPE_WEAPON		UMETA(DisplayName = "Weapon"),
 	EQTYPE_ARMOR		UMETA(DisplayName = "Armor"),
-	EQTYPE_CONSUMABLE	UMETA(DisplayName = "Consumable"),
+	EQTYPE_EQUIPMENT	UMETA(DisplayName = "Equipment"),
 };
 
 UCLASS(Abstract, Blueprintable, BlueprintType, DefaultToInstanced)

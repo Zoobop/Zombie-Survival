@@ -187,6 +187,16 @@ void AGun::CheckFire()
 
 TArray<class UStatAttributeModifier*> AGun::CalculateHit(FHitResult Hit)
 {
+	/** Get modifiers and apply the calculations to the modification value */
+	auto Modifiers = ApplyStatAttributeModification();
+
+	/** Check for head shot and apply multiplier */
+	if (Hit.BoneName == "head" || Hit.BoneName == "neck_01") {
+		UStatAttributeModifier* Modifier = NewObject<UStatAttributeModifier>();
+		Modifier->SetupModifier(DefaultDamage * 1.5f, EModificationType::MODTYPE_INSTANT_SINGLE, EOperationType::OPTYPE_SUBTRACT, Tag);
+		Modifiers.Add(Modifier);
+	}
+
 	/** Get the difference between the distance at which the entity was hit and gun's max falloff range */
 	float DistancePastFallOff = Hit.Distance - DefaultDamageFallOffRange;
 
@@ -195,22 +205,18 @@ TArray<class UStatAttributeModifier*> AGun::CalculateHit(FHitResult Hit)
 		/** Calculate the new damage amount after damage fall-off */
 		int32 DamageTakeaway = (DistancePastFallOff / DefaultDistanceBetweenIntervals) * DefaultDamageFallOffAmount;
 
-		/** Get modifiers and apply the calculations to the modification value */
-		auto Modifiers = ApplyStatAttributeModification();
-
-		int32 NewDamage = -(DamageTakeaway / Modifiers.Num());
-		if (NewDamage < -DefaultDamage)
-			NewDamage = -DefaultDamage - 1;
+		int32 DamageReductionAfterFallOff = -(DamageTakeaway / Modifiers.Num());
+		if (DamageReductionAfterFallOff < -DefaultDamage)
+			DamageReductionAfterFallOff = -DefaultDamage - 1;
 
 		/** Apply damage */
 		UStatAttributeModifier* Modifier = NewObject<UStatAttributeModifier>();
-		Modifier->SetupModifier(NewDamage, EModificationType::MODTYPE_INSTANT_SINGLE, EOperationType::OPTYPE_SUBTRACT, Tag);
+		Modifier->SetupModifier(DamageReductionAfterFallOff, EModificationType::MODTYPE_INSTANT_SINGLE, EOperationType::OPTYPE_SUBTRACT, Tag);
 		Modifiers.Add(Modifier);
 
-		return Modifiers;
 	}
 
-	return ApplyStatAttributeModification();
+	return Modifiers;
 }
 
 bool AGun::Reload()

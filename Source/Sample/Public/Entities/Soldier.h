@@ -28,6 +28,9 @@ public:
 	void CheckReload();
 
 	FORCEINLINE class USceneComponent* GetWeaponHolder() const { return WeaponHolder; }
+	FORCEINLINE class UChildActorComponent* GetWeaponActor() const { return WeaponActor; }
+	FORCEINLINE class USceneComponent* GetMeleeHolder() const { return MeleeHolder; }
+	FORCEINLINE class UChildActorComponent* GetMeleeActor() const { return MeleeActor; }
 
 protected:
 
@@ -48,10 +51,6 @@ protected:
 	/** Stops the process of firing -- Input Action */
 	UFUNCTION(BlueprintCallable)
 	void StopFire();
-
-	/** Resets the bCanFire boolean */
-	UFUNCTION(BlueprintCallable)
-	void ResetFire() { bCanFire = true; }
 
 	/** ----------- ADS ------------ **/
 
@@ -208,6 +207,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class UChildActorComponent* WeaponActor;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class USceneComponent* MeleeHolder;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class UChildActorComponent* MeleeActor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class UEquipmentComponent* EquipmentComponent;
