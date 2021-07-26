@@ -56,6 +56,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void StopFire();
 
+	/** Use the current weapon -- functionality is determined by the weapon itself */
+	void UseCurrentGun();
+
 	/** ----------- Melee ------------ **/
 
 	UFUNCTION(Server, Reliable)
@@ -115,9 +118,16 @@ protected:
 
 	/** ----------- General Usage ------------ **/
 
-	/** Use the current weapon -- functionality is determined by the weapon itself */
-	void UseCurrentGun();
+	UFUNCTION(Server, Reliable)
+	void ServerInteract();
 
+	void Interact();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void StartInteract();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnInteract(FHitResult Hit);
 
 ////////////////////////////** --------------- Weapon Swap --------------- **//////////////////////////////////
 
@@ -208,6 +218,9 @@ protected:
 
 	/** --------------- Gameplay --------------- **/
 	
+
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	bool bCanInteract;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	bool bCanMelee;

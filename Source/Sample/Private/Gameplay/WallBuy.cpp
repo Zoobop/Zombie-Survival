@@ -13,6 +13,7 @@
 #include "Items/Equipment/Tactical.h"
 #include "Items/Equipment/Consumable.h"
 #include "Entities/EquipmentComponent.h"
+#include "Entities/EntityState.h"
 
 // Sets default values
 AWallBuy::AWallBuy()
@@ -36,18 +37,40 @@ void AWallBuy::Purchase(class ASoldier* Player)
 
 			/** Find if player already contains the item */
 			bItemFound = CheckItem(Player);
-
+			
 			if (bItemFound) {
-				/** Purchase at refill price */
-				OnRefill(Player);
+				/** Check points */
+				if (CheckPlayerPoints(Player, RefillPrice)) {
+					/** Purchase at refill price */
+					OnRefill(Player);
+				}
 			}
 			else {
-				/** Purchase at full price */
-				OnFirstTimePurchase(Player);
+				/** Check points */
+				if (CheckPlayerPoints(Player, PurchasePrice)) {
+					/** Purchase at full price */
+					OnFirstTimePurchase(Player);
+				}
 			}
 		}
 	}
 }
+
+
+bool AWallBuy::CheckPlayerPoints(class ASoldier* Player, int32 PointsNeeded) const
+{
+	/** Validate player */
+	if (Player) {
+
+		/** Validate and check points */
+		if (AEntityState* State = Cast<AEntityState>(Player->GetPlayerState())) {
+			if (State->GetCurrentPoints() >= PointsNeeded)
+				return true;
+		}
+	}
+	return false;
+}
+
 
 // Called when the game starts or when spawned
 void AWallBuy::BeginPlay()
@@ -110,4 +133,3 @@ bool AWallBuy::CheckItem(class ASoldier* Player)
 	}
 	return false;
 }
-

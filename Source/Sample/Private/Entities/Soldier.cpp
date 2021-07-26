@@ -253,6 +253,24 @@ void ASoldier::StopADS()
 	}
 }
 
+
+
+void ASoldier::ServerInteract_Implementation()
+{
+	StartInteract();
+}
+
+void ASoldier::Interact()
+{
+	/** Check authority */
+	if (!HasAuthority()) {
+		ServerInteract();
+	}
+	else {
+		StartInteract();
+	}
+}
+
 ////////////////////////////** --------------- Weapon Swap --------------- **//////////////////////////////////
 
 void ASoldier::ServerSwitchWeapon_Implementation(int32 Index)
@@ -435,6 +453,8 @@ void ASoldier::SetupPlayerInputComponent(class UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Melee", IE_Pressed, this, &ASoldier::StartMelee);
 
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &ASoldier::Interact);
+
 	PlayerInputComponent->BindAction("ADS", IE_Pressed, this, &ASoldier::ADS);
 	PlayerInputComponent->BindAction("ADS", IE_Released, this, &ASoldier::StopADS);
 
@@ -459,4 +479,5 @@ void ASoldier::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME(ASoldier, bCanSwitchWeapons);
 	DOREPLIFETIME(ASoldier, bCanMelee);
 	DOREPLIFETIME(ASoldier, bCanReload);
+	DOREPLIFETIME(ASoldier, bCanInteract);
 }
