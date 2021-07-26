@@ -68,7 +68,6 @@ void UEntityStatComponent::SetDamageDealer(class AEntity* Attacker)
 {
 	if (Attacker) {
 		DamageDealer = Attacker;
-		DamageDealer->OnEntityHit();
 	}
 }
 

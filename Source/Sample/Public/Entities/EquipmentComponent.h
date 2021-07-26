@@ -37,8 +37,26 @@ public:
   	/** Switch weapon index to the new index */
 	void PrepWeaponSwap(int32 ValueChange);
 
+	/** Set melee visibility weapon */
+	UFUNCTION(BlueprintCallable)
+	void SetMeleeVisibility(bool state);
+
   	/** Returns the current weapon */
   	FORCEINLINE class AGun* GetCurrentWeapon() const { return CurrentWeapon; }
+	/** Returns the current melee */
+	FORCEINLINE class AMelee* GetCurrentMelee() const { return CurrentMelee; }
+	/** Returns if there are multiple equipped weapons */
+	FORCEINLINE bool HasMultipleWeapons() const { return EquippedWeapons.Num() > 1; }
+	/** Returns the currently equipped weapons */
+	FORCEINLINE TArray<class AGun*> GetEquippedWeapons() const { return EquippedWeapons; }
+	/** Returns the currently equipped armor */
+	FORCEINLINE TMap<uint8, class AArmor*> GetEquippedArmor() const { return EquippedArmor; }
+	/** Returns the currently equipped lethals */
+	FORCEINLINE TArray<class ALethal*> GetEquippedLethals() const { return EquippedLethals; }
+	/** Returns the currently equipped tacticals */
+	FORCEINLINE TArray<class ATactical*> GetEquippedTacticals() const { return EquippedTacticals; }
+	/** Returns the currently equipped consumables */
+	FORCEINLINE TArray<class AConsumable*> GetEquippedConsumables() const { return EquippedConsumables; }
 
 protected:
 
@@ -51,18 +69,23 @@ protected:
 	/** Spawns the armor into the world */
 	class AArmor* HandleArmorSpawn(TSubclassOf<class AArmor> Armor);
 
+	/** Initializes the starting weapons, armor, and other equipment */
+	UFUNCTION()
+	void InitializeEquipment();
+
 	/** Switch out weapons */
 	UFUNCTION(BlueprintCallable)
 	void SwitchOutWeapon(class AGun* WeaponToSwitchTo);
 
+	/** Server switch weapons */
+	UFUNCTION(Server, Reliable)
+	void ServerSwitchWeapon(class AGun* WeaponToSwitchTo);
+
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-	/** Spawn weapon actors into the world */
-	void WeaponSetup();
-
-	/** Spawn armor actors into the world */
-	void ArmorSetup();
+	UFUNCTION()
+	void OnRep_WeaponIndexChanged();
 
 	UFUNCTION()
 	void OnRep_WeaponChanged();
@@ -115,8 +138,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
 	TArray<class ATactical*> EquippedTacticals;
 
+	/** Currently equipped consumables */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
+	TArray<class AConsumable*> EquippedConsumables;
+
   	/** Current Weapon */
-  	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Equipment", Replicated)
+  	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Equipment", ReplicatedUsing = "OnRep_WeaponChanged")
     class AGun* CurrentWeapon;
 
 	/** Current Melee */
@@ -134,6 +161,6 @@ protected:
 private:
 
 	/** Current weapon index */
-	UPROPERTY(ReplicatedUsing = "OnRep_WeaponChanged")
+	UPROPERTY(ReplicatedUsing = "OnRep_WeaponIndexChanged")
 	int32 WeaponIndex;
 };

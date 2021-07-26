@@ -12,9 +12,7 @@ UENUM(BlueprintType)
 enum struct EWeaponType : uint8
 {
 	WPTYPE_MELEE	UMETA(DisplayName = "Melee"),
-	WPTYPE_PISTOL	UMETA(DisplayName = "Pistol"),
-	WPTYPE_SMG		UMETA(DisplayName = "SMG"),
-	WPTYPE_RIFLE	UMETA(DisplayName = "Rifle"),
+	WPTYPE_GUN	UMETA(DisplayName = "Gun"),
 };
 
 UCLASS(Abstract, Blueprintable, BlueprintType)

@@ -24,6 +24,9 @@ public:
 
 	virtual void SendDeathData(AEntity* Killed) override;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnPlayerInitialized();
+
 	/** Starts to reload if magazine is empty */
 	void CheckReload();
 
@@ -31,6 +34,7 @@ public:
 	FORCEINLINE class UChildActorComponent* GetWeaponActor() const { return WeaponActor; }
 	FORCEINLINE class USceneComponent* GetMeleeHolder() const { return MeleeHolder; }
 	FORCEINLINE class UChildActorComponent* GetMeleeActor() const { return MeleeActor; }
+	FORCEINLINE class UEquipmentComponent* GetEquipmentComponent() const { return EquipmentComponent; }
 
 protected:
 
@@ -51,6 +55,25 @@ protected:
 	/** Stops the process of firing -- Input Action */
 	UFUNCTION(BlueprintCallable)
 	void StopFire();
+
+	/** ----------- Melee ------------ **/
+
+	UFUNCTION(Server, Reliable)
+	void ServerOnMelee();
+
+	UFUNCTION(Server, Reliable)
+	void ServerStopMelee();
+
+	/** Starts the process of meleeing -- Input Action */
+	UFUNCTION(BlueprintCallable)
+	void StartMelee();
+
+	UFUNCTION(BlueprintCallable)
+	void FinishMelee();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnStartMelee();
+
 
 	/** ----------- ADS ------------ **/
 
@@ -186,8 +209,11 @@ protected:
 	/** --------------- Gameplay --------------- **/
 	
 
-	UPROPERTY(BlueprintReadOnly)
-	bool bCanFire;
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	bool bCanMelee;
+
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	bool bCanReload;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	bool bCanSwitchWeapons;

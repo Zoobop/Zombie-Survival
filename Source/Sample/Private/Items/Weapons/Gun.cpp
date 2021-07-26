@@ -12,11 +12,19 @@
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
 #include "Entities/EntityState.h"
+#include "Components/PointLightComponent.h"
 
 
 
 AGun::AGun()
 {
+	WeaponType = EWeaponType::WPTYPE_GUN;
+
+	MuzzleFlashEffect = CreateDefaultSubobject<UPointLightComponent>("MuzzleFlash");
+	MuzzleFlashEffect->SetupAttachment(SkeletalMeshComponent, FireLocationSocketName);
+	MuzzleFlashEffect->bEditableWhenInherited = true;
+	MuzzleFlashEffect->SetHiddenInGame(true);
+
 	LoadBullets();
 
 	bReplicates = true;
@@ -81,7 +89,7 @@ void AGun::Fire()
 			/** Debug line that shows the bullets trajectory */
 			//DrawDebugLine(GetWorld(), TraceStart, TraceDistance + BulletSpreadAmount, FColor::Red, false, .1, 0, 2);
 			/** Debug line that shoots straight from the camera */
-			DrawDebugLine(GetWorld(), Player->GetFollowCamera()->GetComponentLocation(), TraceDistance + BulletSpreadAmount, FColor::Magenta, false, .1, 0, 2);
+			//DrawDebugLine(GetWorld(), Player->GetFollowCamera()->GetComponentLocation(), TraceDistance + BulletSpreadAmount, FColor::Magenta, false, .1, 0, 2);
 
 			/** Check for hit */
 			if (bHit) {
@@ -107,7 +115,9 @@ void AGun::Fire()
 						for (auto Modifier : Modifiers) {
 							TotalDamage += Modifier->GetModificationAmount();
 						}
+
 						OnEntityHit(Player, TotalDamage, HitResult);
+						Player->OnEntityHit();
 					}
 			 
 					UE_LOG(LogTemp, Warning, TEXT("Actor has Interface: %f"), Interface)

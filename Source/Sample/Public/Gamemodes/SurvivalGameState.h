@@ -27,6 +27,8 @@ public:
 	UFUNCTION()
 	void GameOver();
 
+	FORCEINLINE bool IsDoublePointsActive() const { return bDoublePointsActivated; }
+
 protected:
 
 	void CalculateUndeadPerRound();
@@ -42,6 +44,10 @@ public:
 	int32 UndeadPerRound = 6;
 
 private:
+
+	bool bDoublePointsActivated;
+
+	bool bInstaKillActivated;
 
 	FTimerHandle TimerHandle_RoundCountDown;
 };

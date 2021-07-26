@@ -39,8 +39,9 @@ ASoldier::ASoldier()
 
 	/** Set game play capabilities */
 	bCanSwitchWeapons = true;
-	bCanFire = true;
 	bCanSprint = true;
+	bCanMelee = true;
+	bCanReload = true;
 	bIsCrouching = false;
 
 	DefaultMovementSpeed = 400.0f;
@@ -78,7 +79,6 @@ void ASoldier::StartSprint()
 {
 	if (bCanSprint) {
 		bIsSprinting = true;
-		bCanFire = false;
 
 		OnStartSprint();
 
@@ -89,7 +89,6 @@ void ASoldier::StartSprint()
 void ASoldier::StopSprint()
 {
 	bIsSprinting = false;
-	bCanFire = true;
 
 	OnStopSprint();
 
@@ -135,19 +134,18 @@ void ASoldier::StopCrouch_Implementation()
 
 void ASoldier::ServerStartReload_Implementation()
 {
-	AGun* Gun = EquipmentComponent->GetCurrentWeapon();
-
 	/** Validate the current weapon */
-	if (Gun) {
+	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
 		/** Check if ammo is not full and if not already reloading */
-		if (!Gun->IsMagazineFull() && !Gun->HasNoAmmo()) {
+		if (!Gun->IsMagazineFull() && !Gun->HasNoAmmo() && bCanReload) {
+			bCanReload = false;
+			bCanSwitchWeapons = false;
 
 			/** Set gun firing capability to false */
 			Gun->SetFire(false);
 			OnGunStartReload(Gun);
 		}
 	}
-
 }
 
 void ASoldier::StartReload()
@@ -158,12 +156,12 @@ void ASoldier::StartReload()
 		ServerStartReload();
 	}
 	else {
-		AGun* Gun = EquipmentComponent->GetCurrentWeapon();
-
 		/** Validate the current weapon */
-		if (Gun) {
+		if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
 			/** Check if ammo is not full and if not already reloading */
-			if (!Gun->IsMagazineFull() && !Gun->HasNoAmmo()) {
+			if (!Gun->IsMagazineFull() && !Gun->HasNoAmmo() && bCanReload) {
+				bCanReload = false;
+				bCanSwitchWeapons = false;
 
 				/** Set gun firing capability to false */
 				Gun->SetFire(false);
@@ -176,17 +174,19 @@ void ASoldier::StartReload()
 
 void ASoldier::FinishReload()
 {
-	AGun* Gun = EquipmentComponent->GetCurrentWeapon();
-
-	Gun->Reload();
-	Gun->SetFire(true);
+	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
+		Gun->Reload();
+		Gun->SetFire(true);
+		bCanReload = true;
+		bCanSwitchWeapons = true;
 	
-	OnGunReloaded.Broadcast();
+		OnGunReloaded.Broadcast();
+	}
 }
 
 void ASoldier::CheckReload()
 {
-	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {		
+	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
 		if (!Gun->HasBulletsToFire() && !Gun->HasNoAmmo()) {
 			StartReload();
 		}
@@ -257,10 +257,11 @@ void ASoldier::StopADS()
 
 void ASoldier::ServerSwitchWeapon_Implementation(int32 Index)
 {
-	if (bCanSwitchWeapons) {
+	if (EquipmentComponent->HasMultipleWeapons() && bCanSwitchWeapons) {
 		EquipmentComponent->PrepWeaponSwap(Index);
 		bCanSwitchWeapons = false;
-		bIsReloading = false;
+		bCanReload = false;
+		bCanMelee = false;
 		EquipmentComponent->GetCurrentWeapon()->SetFire(false);
 	}
 }
@@ -271,11 +272,12 @@ void ASoldier::NextWeapon()
 		ServerSwitchWeapon(1);
 	}
 	else {
-		if (bCanSwitchWeapons) {
+		if (EquipmentComponent->HasMultipleWeapons() && bCanSwitchWeapons) {
 			/** Adds plus 1 to the current weapon index */
 			EquipmentComponent->PrepWeaponSwap(1);
 			bCanSwitchWeapons = false;
-			bIsReloading = false;
+			bCanReload = false;
+			bCanMelee = false;
 			EquipmentComponent->GetCurrentWeapon()->SetFire(false);
 		}
 	}
@@ -287,11 +289,12 @@ void ASoldier::PreviousWeapon()
 		ServerSwitchWeapon(-1);
 	}
 	else {
-		if (bCanSwitchWeapons) {
+		if (EquipmentComponent->HasMultipleWeapons() && bCanSwitchWeapons) {
 			/** Adds negative 1 to the current weapon index */
 			EquipmentComponent->PrepWeaponSwap(-1);
 			bCanSwitchWeapons = false;
-			bIsReloading = false;
+			bCanReload = false;
+			bCanMelee = false;
 			EquipmentComponent->GetCurrentWeapon()->SetFire(false);
 		}
 	}
@@ -301,7 +304,8 @@ void ASoldier::ResetWeaponSwap()
 {
 	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
 		bCanSwitchWeapons = true;
-		bIsReloading = true;
+		bCanReload = true;
+		bCanMelee = true;
 		Gun->SetFire(true);
 	}
 }
@@ -346,6 +350,68 @@ void ASoldier::StopFire()
 	}
 }
 
+
+
+void ASoldier::ServerOnMelee_Implementation()
+{
+	if (bCanMelee) {
+		if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
+			bCanMelee = false;
+			bCanSwitchWeapons = false;
+			bCanReload = false;
+			Gun->SetFire(false);
+			EquipmentComponent->SetMeleeVisibility(false);
+			OnStartMelee();
+		}
+	}
+}
+
+void ASoldier::ServerStopMelee_Implementation()
+{
+	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
+		bCanMelee = true;
+		bCanSwitchWeapons = true;
+		bCanReload = true;
+		EquipmentComponent->SetMeleeVisibility(true);
+		Gun->SetFire(true);
+	}
+}
+
+void ASoldier::StartMelee()
+{
+	if (!HasAuthority()) {
+		ServerOnMelee();
+	}
+	else {
+		if (bCanMelee) {
+			if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
+				bCanMelee = false;
+				bCanSwitchWeapons = false;
+				bCanReload = false;
+				EquipmentComponent->SetMeleeVisibility(false);
+				Gun->SetFire(false);
+				OnStartMelee();
+			}
+		}
+	}
+}
+
+void ASoldier::FinishMelee()
+{
+	if (!HasAuthority()) {
+		ServerStopMelee();
+	}
+	else {
+		if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
+			bCanMelee = true;
+			bCanSwitchWeapons = true;
+			bCanReload = true;
+			EquipmentComponent->SetMeleeVisibility(true);
+			Gun->SetFire(true);
+		}
+	}
+}
+
 void ASoldier::UseCurrentGun()
 {
 	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
@@ -366,6 +432,8 @@ void ASoldier::SetupPlayerInputComponent(class UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Shoot", IE_Pressed, this, &ASoldier::StartFire);
 	PlayerInputComponent->BindAction("Shoot", IE_Released, this, &ASoldier::StopFire);
+
+	PlayerInputComponent->BindAction("Melee", IE_Pressed, this, &ASoldier::StartMelee);
 
 	PlayerInputComponent->BindAction("ADS", IE_Pressed, this, &ASoldier::ADS);
 	PlayerInputComponent->BindAction("ADS", IE_Released, this, &ASoldier::StopADS);
@@ -389,4 +457,6 @@ void ASoldier::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME(ASoldier, bIsReloading);
 	DOREPLIFETIME(ASoldier, bIsCrouching);
 	DOREPLIFETIME(ASoldier, bCanSwitchWeapons);
+	DOREPLIFETIME(ASoldier, bCanMelee);
+	DOREPLIFETIME(ASoldier, bCanReload);
 }

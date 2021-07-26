@@ -132,9 +132,13 @@ protected:
 
 	/** --------------- Gun Specifics --------------- **/
 
-// 	/** Base weapon Stat Modifier */
-// 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|StatModifiers")
-// 	class UStatAttributeModifier* StatAttributeModifier;
+	/** Point light for muzzle flash effect */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	class UPointLightComponent* MuzzleFlashEffect;
+
+	/** Base weapon Stat Modifier */
+ 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|StatModifiers")
+ 	class UStatAttributeModifier* StatAttributeModifier;
 
 	/** Modifier Tag */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|StatModifiers")
@@ -215,6 +219,14 @@ protected:
 	/** Gun equip animation */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|Animations")
 	class UAnimMontage* EquipAnimation;
+
+	/** Gun firing sound cue */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|Sounds")
+	class USoundCue* GunFireSound;
+
+	/** Gun trying to fire with no ammo sound cue */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|Sounds")
+	class USoundCue* GunEmptySound;
 
 	/** Event to update UI and play effects */
 	UPROPERTY(BlueprintAssignable)

@@ -107,27 +107,61 @@ bool UEquipmentComponent::RemoveFromEquipSlot(class AEquipableItem* ItemToRemove
 void UEquipmentComponent::PrepWeaponSwap(int32 ValueChange)
 {
 	/** Modify weapon index */
-	WeaponIndex += ValueChange;
+	int32 TempIndex = WeaponIndex;
+	TempIndex += ValueChange;
 
 	/** Clamp index */
-	if (WeaponIndex < 0)
-		WeaponIndex = EquippedWeapons.Num() - 1;
-	else if (WeaponIndex > EquippedWeapons.Num() - 1)
-		WeaponIndex = 0;
+	if (TempIndex < 0)
+		TempIndex = EquippedWeapons.Num() - 1;
+	else if (TempIndex > EquippedWeapons.Num() - 1)
+		TempIndex = 0;
 
-	OnRep_WeaponChanged();
+	WeaponIndex = TempIndex;
+	OnRep_WeaponIndexChanged();
 }
 
 void UEquipmentComponent::SwitchOutWeapon(class AGun* WeaponToSwitchTo)
 {
-	/** Validate current weapon and weapon to switch to */
-	if (CurrentWeapon && WeaponToSwitchTo) {
-		CurrentWeapon->SetActorHiddenInGame(true);
-
-		/** Get weapon from index and assign to current weapon -- Set actor to be visible */
-		CurrentWeapon = WeaponToSwitchTo;
-		CurrentWeapon->SetActorHiddenInGame(false);
+	if (!Player->HasAuthority()) {
+		ServerSwitchWeapon(WeaponToSwitchTo);
 	}
+	else {
+		/** Validate weapon to switch to */
+		if (WeaponToSwitchTo) {
+			if (CurrentWeapon) {
+				CurrentWeapon->SetActorHiddenInGame(true);
+			}
+			CurrentWeapon = WeaponToSwitchTo;
+			OnRep_WeaponChanged();
+		}
+	}
+}
+
+void UEquipmentComponent::ServerSwitchWeapon_Implementation(class AGun* WeaponToSwitchTo)
+{
+	/** Validate weapon to switch to */
+	if (WeaponToSwitchTo) {
+		if (CurrentWeapon) {
+			CurrentWeapon->SetActorHiddenInGame(true);
+		}
+		CurrentWeapon = WeaponToSwitchTo;
+		OnRep_WeaponChanged();
+	}
+}
+
+void UEquipmentComponent::SetMeleeVisibility(bool state)
+{
+	CurrentMelee->SetActorHiddenInGame(state);
+}
+
+////////////////////////////** --------------- Initialization --------------- **//////////////////////////////////
+
+void UEquipmentComponent::BeginPlay()
+{
+ 	Super::BeginPlay();
+	
+	InitializeEquipment();
+
 }
 
 class AGun* UEquipmentComponent::HandleWeaponSpawn(TSubclassOf<class AGun> Gun)
@@ -168,8 +202,6 @@ class AMelee* UEquipmentComponent::HandleMeleeSpawn(TSubclassOf<class AMelee> Me
 
 			SpawnMelee->AttachToComponent(Player->GetMeleeHolder(), FAttachmentTransformRules::SnapToTargetIncludingScale);
 			SpawnMelee->SetActorHiddenInGame(true);
-			Player->GetMeleeActor()->SetChildActorClass(Melee);
-			Player->GetMeleeActor()->SetHiddenInGame(true);
 
 			return SpawnMelee;
 		}
@@ -180,7 +212,7 @@ class AMelee* UEquipmentComponent::HandleMeleeSpawn(TSubclassOf<class AMelee> Me
 class AArmor* UEquipmentComponent::HandleArmorSpawn(TSubclassOf<class AArmor> Armor)
 {
 	if (Armor) {
-		
+
 		if (Player) {
 
 			FActorSpawnParameters SpawnParams;
@@ -195,63 +227,57 @@ class AArmor* UEquipmentComponent::HandleArmorSpawn(TSubclassOf<class AArmor> Ar
 	return nullptr;
 }
 
-
-// Called when the game starts
-void UEquipmentComponent::BeginPlay()
-{
- 	Super::BeginPlay();
-	
-	WeaponSetup();
-
-}
-
-void UEquipmentComponent::WeaponSetup()
+void UEquipmentComponent::InitializeEquipment()
 {
 	/** Validate default weapons */
 	if (DefaultWeapons.Num() > 0) {
-		/** Spawns in and adds default weapons to equipped list */
+		/** Adds default weapons to equipped list */
 		for (auto DefaultGun : DefaultWeapons) {
 			AGun* Gun = HandleWeaponSpawn(DefaultGun);
 			EquippedWeapons.Add(Gun);
 		}
 	}
 
-	/** Spawns in melee weapon if valid */
+	/** Validate default melee weapon and make it the child actor class of weapon actor */
 	if (DefaultMelee) {
 		CurrentMelee = HandleMeleeSpawn(DefaultMelee);
 	}
 
-	/** Assign the current weapon to be the first weapon in weapons list */
-	if (EquippedWeapons[0]) {
-		CurrentWeapon = EquippedWeapons[0];
-		CurrentWeapon->SetActorHiddenInGame(false);
-
-		/** Update current weapon and UI */
-		OnEquipmentChanged.Broadcast();
-	}
-}
-
-void UEquipmentComponent::ArmorSetup()
-{
 	/** Validate default armor */
 	if (DefaultArmor.Num() > 0) {
-		/** Spawns in and adds default armor to equipped list */
-		for (auto ArmorPair : DefaultArmor) {
-			AArmor* Armor = HandleArmorSpawn(ArmorPair.Value);
-			EquippedArmor[ArmorPair.Key] = Armor;
-		}
+
 	}
 
-	if (EquippedArmor[0]) {
-		OnEquipmentChanged.Broadcast();
+	/** Validate default lethals */
+	if (DefaultLethals.Num() > 0) {
+
 	}
+
+	/** Validate default tacticals */
+	if (DefaultTacticals.Num() > 0) {
+
+	}
+
+	/** Validate default consumables */
+	if (DefaultConsumables.Num() > 0) {
+
+	}
+
+	PrepWeaponSwap(WeaponIndex);
+	OnEquipmentChanged.Broadcast();
+	Player->OnPlayerInitialized();
 }
 
 
+
+void UEquipmentComponent::OnRep_WeaponIndexChanged()
+{
+	OnWeaponSwitched.Broadcast(EquippedWeapons[WeaponIndex]);
+}
 
 void UEquipmentComponent::OnRep_WeaponChanged()
 {
-	OnWeaponSwitched.Broadcast(EquippedWeapons[WeaponIndex]);
+	CurrentWeapon->SetActorHiddenInGame(false);
 }
 
 void UEquipmentComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
