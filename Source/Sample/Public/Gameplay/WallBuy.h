@@ -17,9 +17,11 @@ public:
 	AWallBuy();
 
 	/** Purchases the display item and gives it to the player */
+	UFUNCTION(BlueprintCallable)
 	void Purchase(class ASoldier* Player) override;
 
 	/** Checks the player points to see if there is enough */
+	UFUNCTION(BlueprintCallable)
 	bool CheckPlayerPoints(class ASoldier* Player, int32 PointsNeeded) const override;
 
 protected:
@@ -36,13 +38,25 @@ protected:
 
 	/** Displays the weapon name and cost for purchase */
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnDisplay();
+	void OnDisplay(class ASoldier* Player);
 
 	/** Checks if the player contains the item */
 	UFUNCTION(BlueprintCallable)
-	bool CheckItem(class ASoldier* Player);
+	virtual bool CheckForItem(class ASoldier* Player);
+
+	/** Prepare the wall buy item */
+	virtual void PrepWallBuy() PURE_VIRTUAL(AWallBuy, );
 
 protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class USkeletalMeshComponent* WallBuyBase;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* PurchaseTrigger;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	class UPointLightComponent* WallBuyHighlight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallBuy")
 	TSubclassOf<class AEquipableItem> ItemToBuy;
@@ -51,20 +65,11 @@ protected:
 	FText ItemName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallBuy", meta = (ClampMin = 0))
-	int32 PurchasePrice;
+	int32 PrimaryPrice;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallBuy", meta = (ClampMin = 0))
-	int32 RefillPrice;
+	int32 SecondaryPrice;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool bHasBeenPurchased;
-
-private:
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class USkeletalMeshComponent* ItemMesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UBoxComponent* PurchaseTrigger;
-
 };

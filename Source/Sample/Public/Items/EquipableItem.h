@@ -37,6 +37,8 @@ public:
 	FORCEINLINE EEquipableType GetItemType() const { return Type; }
 	/** Returns the mesh of the equipable item */
 	FORCEINLINE class USkeletalMesh* GetSkeletalMesh() const { return SkeletalMeshComponent->SkeletalMesh; }
+	/** Returns the name of the equipable item */
+	FORCEINLINE FText GetName() const { return ItemDisplayName; }
 
 /** --------------- Fields --------------- **/
 protected:
