@@ -29,6 +29,14 @@ protected:
 	/** Prepare the wall buy item */
 	virtual void PrepWallBuy() override;
 
+	/** Server First Time Purchase */
+	UFUNCTION(Server, Reliable)
+	void ServerOnFirstTimePurchase(class ASoldier* Player);
+
+	/** Server Refill */
+	UFUNCTION(Server, Reliable)
+	void ServerOnRefill(class ASoldier* Player);
+
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "WallBuy")

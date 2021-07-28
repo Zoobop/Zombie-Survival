@@ -54,6 +54,41 @@ bool UEquipmentComponent::AddToEquipSlot(class AEquipableItem* ItemToAdd)
   	return false;
 }
   
+bool UEquipmentComponent::AddGun(TSubclassOf<class AGun> GunToAdd)
+{
+	if (!Player->HasAuthority()) {
+		ServerAddGun(GunToAdd);
+		return true;
+	}
+	else {
+		/** Validate gun to add */
+		if (GunToAdd) {
+
+			/** Check if there is enough space for more weapons */
+			if (EquippedWeapons.Num() < WeaponCapacity) {
+
+				/** Spawn in weapon and add to equipped weapons */
+				if (AGun* NewGun = HandleWeaponSpawn(GunToAdd)) {
+					EquippedWeapons.Add(NewGun);
+
+					WeaponIndex = EquippedWeapons.Find(NewGun);
+					OnRep_WeaponIndexChanged();
+				}
+			}
+			else {
+				/** Replace with current weapon if full */
+				AGun* NewGun = HandleWeaponSpawn(GunToAdd);
+				AGun* OldGun = EquippedWeapons[WeaponIndex];
+				EquippedWeapons[WeaponIndex] = NewGun;
+
+				OnWeaponSwitched.Broadcast(NewGun);
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
 bool UEquipmentComponent::RemoveFromEquipSlot(class AEquipableItem* ItemToRemove)
 {
   	/** Check if ItemToRemove is valid */
@@ -146,6 +181,32 @@ void UEquipmentComponent::ServerSwitchWeapon_Implementation(class AGun* WeaponTo
 		}
 		CurrentWeapon = WeaponToSwitchTo;
 		OnRep_WeaponChanged();
+	}
+}
+
+void UEquipmentComponent::ServerAddGun_Implementation(TSubclassOf<class AGun> GunToAdd)
+{
+	/** Validate gun to add */
+	if (GunToAdd) {
+
+		/** Check if there is enough space for more weapons */
+		if (EquippedWeapons.Num() < WeaponCapacity) {
+
+			/** Spawn in weapon and add to equipped weapons */
+			AGun* NewGun = HandleWeaponSpawn(GunToAdd);
+			EquippedWeapons.Add(NewGun);
+
+			WeaponIndex = EquippedWeapons.Find(NewGun);
+			OnRep_WeaponIndexChanged();
+		}
+		else {
+			/** Replace with current weapon if full */
+			AGun* NewGun = HandleWeaponSpawn(GunToAdd);
+			AGun* OldGun = EquippedWeapons[WeaponIndex];
+			EquippedWeapons[WeaponIndex] = NewGun;
+
+			OnWeaponSwitched.Broadcast(NewGun);
+		}
 	}
 }
 

@@ -67,3 +67,13 @@ void AMeleeWallBuy::PrepWallBuy()
 		WallBuyBase->SetSkeletalMesh(Melee->GetSkeletalMesh());
 	}
 }
+
+void AMeleeWallBuy::ServerOnFirstTimePurchase_Implementation(class ASoldier* Player)
+{
+
+}
+
+void AMeleeWallBuy::ServerOnRefill_Implementation(class ASoldier* Player)
+{
+
+}

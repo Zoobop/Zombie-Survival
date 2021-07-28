@@ -36,10 +36,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnRefill(class ASoldier* Player);
 
-	/** Displays the weapon name and cost for purchase */
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnDisplay(class ASoldier* Player);
-
 	/** Checks if the player contains the item */
 	UFUNCTION(BlueprintCallable)
 	virtual bool CheckForItem(class ASoldier* Player);

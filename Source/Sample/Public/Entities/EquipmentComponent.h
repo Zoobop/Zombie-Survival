@@ -30,6 +30,10 @@ public:
 
   	/** Tries to add an equipable item to the equip slot */
   	bool AddToEquipSlot(class AEquipableItem* ItemToAdd);
+
+	/** Tries to add a gun to the equipped weapons */
+	UFUNCTION(BlueprintCallable)
+	bool AddGun(TSubclassOf<class AGun> GunToAdd);
   
   	/** Tries to remove an equipable item from the equip slot */
   	bool RemoveFromEquipSlot(class AEquipableItem* ItemToRemove);
@@ -40,6 +44,18 @@ public:
 	/** Set melee visibility weapon */
 	UFUNCTION(BlueprintCallable)
 	void SetMeleeVisibility(bool state);
+
+ 	/** Spawns the weapon into the world */
+	UFUNCTION(BlueprintCallable)
+	class AGun* HandleWeaponSpawn(TSubclassOf<class AGun> Gun);
+
+	/** Spawns the melee weapon into the world */
+	UFUNCTION(BlueprintCallable)
+	class AMelee* HandleMeleeSpawn(TSubclassOf<class AMelee> Melee);
+
+	/** Spawns the armor into the world */
+	UFUNCTION(BlueprintCallable)
+	class AArmor* HandleArmorSpawn(TSubclassOf<class AArmor> Armor);
 
   	/** Returns the current weapon */
   	FORCEINLINE class AGun* GetCurrentWeapon() const { return CurrentWeapon; }
@@ -60,15 +76,6 @@ public:
 
 protected:
 
- 	/** Spawns the weapon into the world */
-	class AGun* HandleWeaponSpawn(TSubclassOf<class AGun> Gun);
-
-	/** Spawns the melee weapon into the world */
-	class AMelee* HandleMeleeSpawn(TSubclassOf<class AMelee> Melee);
-
-	/** Spawns the armor into the world */
-	class AArmor* HandleArmorSpawn(TSubclassOf<class AArmor> Armor);
-
 	/** Initializes the starting weapons, armor, and other equipment */
 	UFUNCTION()
 	void InitializeEquipment();
@@ -80,6 +87,10 @@ protected:
 	/** Server switch weapons */
 	UFUNCTION(Server, Reliable)
 	void ServerSwitchWeapon(class AGun* WeaponToSwitchTo);
+
+	/** Tells the server to add a gun */
+	UFUNCTION(Server, Reliable)
+	void ServerAddGun(TSubclassOf<class AGun> GunToAdd);
 
 	// Called when the game starts
 	virtual void BeginPlay() override;

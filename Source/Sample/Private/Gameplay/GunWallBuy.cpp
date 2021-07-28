@@ -30,6 +30,7 @@ void AGunWallBuy::Purchase(class ASoldier* Player)
 				if (CheckPlayerPoints(Player, SecondaryPrice)) {
 					/** Purchase at refill price */
 					OnRefill(Player);
+					ServerOnRefill(Player);
 				}
 			}
 			else {
@@ -37,6 +38,7 @@ void AGunWallBuy::Purchase(class ASoldier* Player)
 				if (CheckPlayerPoints(Player, PrimaryPrice)) {
 					/** Purchase at full price */
 					OnFirstTimePurchase(Player);
+					ServerOnFirstTimePurchase(Player);
 				}
 			}
 		}
@@ -69,5 +71,24 @@ void AGunWallBuy::PrepWallBuy()
 		AGun* Gun = Cast<AGun>(GunToBuy);
 		ItemName = Gun->GetName();
 		WallBuyBase->SetSkeletalMesh(Gun->GetSkeletalMesh());
+	}
+}
+
+void AGunWallBuy::ServerOnFirstTimePurchase_Implementation(class ASoldier* Player)
+{
+	/** Validate player */
+	if (Player) {
+
+		/** Adds the weapon to equipped weapons */
+		Player->GetEquipmentComponent()->AddGun(GunToBuy);
+		
+	}
+}
+
+void AGunWallBuy::ServerOnRefill_Implementation(class ASoldier* Player)
+{
+	/** Validate player */
+	if (Player) {
+
 	}
 }

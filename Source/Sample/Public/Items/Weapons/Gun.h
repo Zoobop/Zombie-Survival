@@ -89,6 +89,10 @@ public:
 	/** Returns the equip animation */
 	FORCEINLINE class UAnimMontage* GetEquipAnimation() const { return EquipAnimation; }
 
+	/** Returns if the gun has full ammo */
+	UFUNCTION(BlueprintPure, BlueprintCallable)
+	FORCEINLINE bool HasFullAmmo() const { return CurrentMagazineAmmo == DefaultAmmoPerMagazine && CurrentAmmoReserves == DefaultNumberOfMagazines * DefaultAmmoPerMagazine; }
+
 protected:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
