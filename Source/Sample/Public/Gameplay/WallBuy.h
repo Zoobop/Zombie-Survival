@@ -20,10 +20,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Purchase(class ASoldier* Player) override;
 
-	/** Checks the player points to see if there is enough */
-	UFUNCTION(BlueprintCallable)
-	bool CheckPlayerPoints(class ASoldier* Player, int32 PointsNeeded) const override;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -18,7 +18,9 @@ enum struct EFaction : uint8
 };
 
 /** Blueprints will bind to this event to update the UI */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatAttributeChanged, class UStatAttribute*, StatAttribute);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStatAttributeChanged);
+/** Blueprints will bind to this event to debug stats */
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatAttributeChangedDebug, class UStatAttribute*, StatAttribute);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class SAMPLE_API UEntityStatComponent : public UActorComponent, public IESSDeathHandlerInterface, public IESSModifierReceptionInterface
@@ -37,6 +39,7 @@ public:
 	void UndeadDefaults();
 
 	/** Call when receiving damage from another entity */
+	UFUNCTION(BlueprintCallable)
 	void ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers) override;
 
 	/** Set your killer */
@@ -58,10 +61,19 @@ public:
 
 	/** Returns the faction of the entity */
 	FORCEINLINE EFaction GetFaction() const { return Faction; }
+	/** Returns the faction of the entity */
+	FORCEINLINE class UStatAttributeSet* GetStatAttributeSet() const { return StatAttributeSet; }
 
 protected:
 
 	virtual void BeginPlay() override;
+
+	/** Clears and/or maintains all modifiers in the list */
+	virtual void ModifierMaintenance();
+
+	/** Finds the first stat attribute that is associated with the specified tag */
+	UFUNCTION(BlueprintCallable)
+	class UStatAttribute* FindStatAttribute(FName Tag) const;
 
 private:
 
@@ -90,8 +102,11 @@ protected:
 	UPROPERTY(BlueprintReadWrite, Replicated)
 	AEntity* DamageDealer;
 
-	UPROPERTY(BlueprintAssignable)
+	UPROPERTY(BlueprintAssignable, BlueprintCallable)
 	FOnStatAttributeChanged OnStatAttributeChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnStatAttributeChangedDebug OnStatAttributeChangedDebug;
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHandleDeath OnHandleDeath;

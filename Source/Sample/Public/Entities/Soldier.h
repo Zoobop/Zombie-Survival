@@ -116,6 +116,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void FinishReload();
 
+	UFUNCTION(BlueprintCallable)
+	void ResetReload(bool State);
+
 	/** ----------- General Usage ------------ **/
 
 	UFUNCTION(Server, Reliable)

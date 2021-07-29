@@ -28,15 +28,9 @@ public:
 	// Sets default values for this component's properties
 	UEquipmentComponent();
 
-  	/** Tries to add an equipable item to the equip slot */
-  	bool AddToEquipSlot(class AEquipableItem* ItemToAdd);
-
 	/** Tries to add a gun to the equipped weapons */
 	UFUNCTION(BlueprintCallable)
 	bool AddGun(TSubclassOf<class AGun> GunToAdd);
-  
-  	/** Tries to remove an equipable item from the equip slot */
-  	bool RemoveFromEquipSlot(class AEquipableItem* ItemToRemove);
 
   	/** Switch weapon index to the new index */
 	void PrepWeaponSwap(int32 ValueChange);

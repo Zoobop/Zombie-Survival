@@ -24,8 +24,13 @@ class SAMPLE_API IPurchasableInterface
 public:
 
 	UFUNCTION()
-	virtual bool CheckPlayerPoints(class ASoldier* Player, int32 PointsNeeded) const = 0;
+	virtual bool CheckPlayerPoints(class ASoldier* Player, int32 PointsNeeded) const;
 
 	UFUNCTION()
 	virtual void Purchase(class ASoldier* Player) = 0;
+
+protected:
+
+	UFUNCTION()
+	virtual void RemovePointsFromPlayer(class ASoldier* Player, int32 PointsToRemove) const;
 };

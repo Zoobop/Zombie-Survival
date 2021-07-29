@@ -37,13 +37,13 @@ public:
 
 protected:
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player")
 	int32 Kills = 0;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player")
 	int32 TotalPoints = 500;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player")
 	int32 CurrentPoints = 500;
 
 };

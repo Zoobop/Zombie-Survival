@@ -37,16 +37,18 @@ protected:
 
 public:
 
-	UPROPERTY(ReplicatedUsing = "OnRep_RoundChanged")
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = "OnRep_RoundChanged", Category = "SurvivalGame")
 	int32 RoundNumber = 0;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Category = "SurvivalGame")
 	int32 UndeadPerRound = 6;
 
 private:
 
+	UPROPERTY(EditDefaultsOnly, Category = "SurvivalGame")
 	bool bDoublePointsActivated;
 
+	UPROPERTY(EditDefaultsOnly, Category = "SurvivalGame")
 	bool bInstaKillActivated;
 
 	FTimerHandle TimerHandle_RoundCountDown;

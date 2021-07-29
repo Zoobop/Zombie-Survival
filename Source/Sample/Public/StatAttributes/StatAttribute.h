@@ -37,6 +37,8 @@ public:
 	FORCEINLINE FName GetStatAttributeTag() const { return StatAttributeTag; }
 	FORCEINLINE int32 GetCurrentValue() const { return CurrentValue; }
 	FORCEINLINE int32 GetMinValue() const { return MinValue; }
+	/** Returns if the current value is equal to the max value */
+	FORCEINLINE bool HasFullValue() const { return CurrentValue == DefaultValue + BonusValue + InfiniteBonusValue; }
 
 protected:
 

@@ -28,10 +28,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void Action(FTransform SpawnTransform, class AEntity* Character) PURE_VIRTUAL(AWeapon, );
 
-	/** Call this function to prep the weapon for use if needed */
-	UFUNCTION(BlueprintCallable)
-	virtual void LoadBullets() PURE_VIRTUAL(AWeapon, );
-
 	/** Call to apply stat attribute modification */
 	TArray<class UStatAttributeModifier*> ApplyStatAttributeModification() override;
 

@@ -57,11 +57,37 @@ void UEntityStatComponent::ReceiveStatAttributeModification(TArray<class UStatAt
 			}
 
 			/** Update the Attribute changes */
-			OnStatAttributeChanged.Broadcast(StatAttribute);
+			OnStatAttributeChangedDebug.Broadcast(StatAttribute);
 		}
 
-		StatAttributeSet->ClearModifiers();
+		/** Manage modifiers */
+		ModifierMaintenance();
 	}
+}
+
+void UEntityStatComponent::ModifierMaintenance()
+{
+	/** Manage modifiers based on their modification type */
+	for (auto Modifier : StatAttributeSet->GetStatAttributeModifiers()) {
+
+		if (Modifier->GetModificationType() == EModificationType::MODTYPE_INSTANT_SINGLE) {
+			StatAttributeSet->ClearModifier(Modifier);
+		}
+	}
+}
+
+class UStatAttribute* UEntityStatComponent::FindStatAttribute(FName Tag) const
+{
+	/** Validate Stat Attribute Set */
+	if (StatAttributeSet) {
+
+		/** Search for the first instance of a stat attribute with the specified tag */
+		for (auto Attribute : StatAttributeSet->GetStatAttributes()) {
+			if (Attribute->GetStatAttributeTag() == Tag)
+				return Attribute;
+		}
+	}
+	return nullptr;
 }
 
 void UEntityStatComponent::SetDamageDealer(class AEntity* Attacker)
@@ -117,6 +143,7 @@ void UEntityStatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 // Called when the game starts
 void UEntityStatComponent::BeginPlay()
 {
+
 	Super::BeginPlay();
 
 	if (StatAttributeSet) {
@@ -125,6 +152,8 @@ void UEntityStatComponent::BeginPlay()
 	}
 	else
 		UE_LOG(LogTemp, Warning, TEXT("Attribute set not found!"))
+
+	OnStatAttributeChanged.Broadcast();
 }
 
 void UEntityStatComponent::PresetStatAttributes()

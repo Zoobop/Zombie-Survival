@@ -22,8 +22,13 @@ public:
 	/** Specific action use of a gun */
 	virtual void Action(FTransform SpawnTransform, class AEntity* Character) override;
 
-	/** Override function for personalized pre-game preparation */
-	virtual void LoadBullets() override;
+	/** Function for personalized pre-game preparation */
+	UFUNCTION(BlueprintCallable)
+	bool LoadBullets();
+
+	/** Tell the server to load bullets */
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ServerLoadBullets();
 
 	/** Set the owner of the gun */
 	void SetGunOwner(class AEntity* Owner);
@@ -52,6 +57,14 @@ public:
 
 ////////////////////////////** --------------- Entity Stat System Interface --------------- **//////////////////////////////////
 
+	/** Adds modifiers to the modifier list */
+	UFUNCTION(BlueprintCallable)
+	void AddModifiers(TArray<class UStatAttributeModifier*> Modifiers);
+
+	/** Tell the server to add modifiers to the list */
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ServerAddModifier(const TArray<class UStatAttributeModifier*>& Modifiers);
+
 	/** Call to apply stat attribute modification */
 	TArray<class UStatAttributeModifier*> ApplyStatAttributeModification() override;
 
@@ -64,6 +77,8 @@ public:
 	FORCEINLINE FName GetTriggerGripSocketName() const { return TriggerGripSocketName; }
 	/** Returns the barrel socket name */
 	FORCEINLINE FName GetBarrelGripSocketName() const { return BarrelGripSocketName; }
+	/** Returns the list of modifiers for this weapon */
+	FORCEINLINE TArray<class UStatAttributeModifier*> GetWeaponModifiers() const { return StatAttributeModifiers; }
 	/** Returns the ammo type of the gun */
 	FORCEINLINE TSubclassOf<class ABullet> GetAmmoType() const { return AmmoType; }
 	/** Returns the bullet velocity of the gun */
@@ -142,7 +157,7 @@ protected:
 
 	/** Base weapon Stat Modifier */
  	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|StatModifiers")
- 	class UStatAttributeModifier* StatAttributeModifier;
+ 	TArray<class UStatAttributeModifier*> StatAttributeModifiers;
 
 	/** Modifier Tag */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Gun|StatModifiers")

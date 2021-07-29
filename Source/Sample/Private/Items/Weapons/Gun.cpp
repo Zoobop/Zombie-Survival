@@ -36,7 +36,7 @@ void AGun::Action(FTransform SpawnTransform, class AEntity* Character)
 
 }
 
-void AGun::LoadBullets()
+bool AGun::LoadBullets()
 {
 	/** Set ammunition amounts */
 	CurrentMagazineAmmo = DefaultAmmoPerMagazine;
@@ -44,6 +44,23 @@ void AGun::LoadBullets()
 
 	/** Check ammo */
 	CheckFire();
+
+	return !HasFullAmmo();
+}
+
+void AGun::ServerLoadBullets_Implementation()
+{
+	LoadBullets();
+}
+
+void AGun::AddModifiers(TArray<class UStatAttributeModifier*> Modifiers)
+{
+	StatAttributeModifiers.Append(Modifiers);
+}
+
+void AGun::ServerAddModifier_Implementation(const TArray<class UStatAttributeModifier*>& Modifiers)
+{
+	AddModifiers(Modifiers);
 }
 
 void AGun::SetGunOwner(class AEntity* GunOwner)
@@ -159,12 +176,15 @@ TArray<class UStatAttributeModifier*> AGun::ApplyStatAttributeModification()
 {
 	TArray<class UStatAttributeModifier*> Modifiers;
 
-	/** Add gun damage to a new modifier and add to list */
+	/** Add current list of weapon modifiers */
+	Modifiers.Append(StatAttributeModifiers);
+
+	/** Add gun damage to a new modifier and add to list of modifiers */
 	Modifiers.Add(GetStatAttributeModifier());
 
 	/** Find and add any bullet modifiers */
 	if (ABullet* Bullet = Cast<ABullet>(AmmoType)) {
-		Modifiers.Add(Bullet->GetStatAttributeModifier());
+		StatAttributeModifiers.Add(Bullet->GetStatAttributeModifier());
 	}
 
 	return Modifiers;

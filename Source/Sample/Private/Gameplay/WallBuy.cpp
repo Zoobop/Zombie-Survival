@@ -34,22 +34,6 @@ void AWallBuy::Purchase(class ASoldier* Player)
 
 }
 
-
-bool AWallBuy::CheckPlayerPoints(class ASoldier* Player, int32 PointsNeeded) const
-{
-	/** Validate player */
-	if (Player) {
-
-		/** Validate and check points */
-		if (AEntityState* State = Cast<AEntityState>(Player->GetPlayerState())) {
-			if (State->GetCurrentPoints() >= PointsNeeded)
-				return true;
-		}
-	}
-	return false;
-}
-
-
 // Called when the game starts or when spawned
 void AWallBuy::BeginPlay()
 {

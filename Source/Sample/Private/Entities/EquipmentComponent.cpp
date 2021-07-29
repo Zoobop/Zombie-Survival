@@ -17,42 +17,6 @@ UEquipmentComponent::UEquipmentComponent()
 
 	Player = Cast<ASoldier>(GetOwner());
 }
-
-bool UEquipmentComponent::AddToEquipSlot(class AEquipableItem* ItemToAdd)
-{
- 	/** Check if ItemToAdd is valid */
-  	if (ItemToAdd) {
-  
-  		/** Check if the ItemToRemove is a Weapon or Armor */
-  		if (ItemToAdd->GetItemType() == EEquipableType::EQTYPE_WEAPON && EquippedWeapons.Num() < WeaponCapacity) {
-  			/** Cast item to Weapon and add */
-  			EquippedWeapons.Add(Cast<AGun>(ItemToAdd));
-  
-  			/** Update Equipment UI */
-  			OnEquipmentChanged.Broadcast();
-  
-  			/** Update Current Weapon Mesh */
-  			OnWeaponSwitched.Broadcast(CurrentWeapon);
-  		}
-  		else if (ItemToAdd->GetItemType() == EEquipableType::EQTYPE_ARMOR && EquippedArmor.Num() < ArmorCapacity) {
-  			/** Cast item to Armor */
-  			const auto ArmorItem = Cast<AArmor>(ItemToAdd);
-  
-  			/** Remove the old item and drop or destroy */
-  			uint8 Key = static_cast<uint8>(ArmorItem->GetArmorType());
-  			const auto OldArmorItem = *EquippedArmor.Find(Key);
-  			//Drop or destroy...
-  
-  			/** Add the new Armor to the Map */
-  			EquippedArmor.Emplace(Key, ArmorItem);
-  
-  			/** Update Equipment UI */
-  			OnEquipmentChanged.Broadcast();
-  		}
-  	}
-  
-  	return false;
-}
   
 bool UEquipmentComponent::AddGun(TSubclassOf<class AGun> GunToAdd)
 {
@@ -89,55 +53,7 @@ bool UEquipmentComponent::AddGun(TSubclassOf<class AGun> GunToAdd)
 	return false;
 }
 
-bool UEquipmentComponent::RemoveFromEquipSlot(class AEquipableItem* ItemToRemove)
-{
-  	/** Check if ItemToRemove is valid */
-  	if (ItemToRemove) {
-  
-  		/** Check if the ItemToRemove is a Weapon */
-  		if (EquippedWeapons.Contains(ItemToRemove)) {
-  			/** Cast item to Weapon */
-  			const auto OldWeaponItem = Cast<AGun>(ItemToRemove);
-  
-  			/** Validate the old item */
-  			if (OldWeaponItem) {
-  				/** Remove old item and drop or destroy based on amount */
-  				EquippedWeapons.RemoveSingle(OldWeaponItem);
-  				//Drop or destroy...
-  			}
-  
-  			/** Update Equipment UI */
-  			OnEquipmentChanged.Broadcast();
-  
-  			/** Update Current Weapon Mesh -- in case it was changed */
-  			OnWeaponSwitched.Broadcast(CurrentWeapon);
-  			return true;
-  		}
-  
-  		/** Check if the ItemToRemove is Armor */
-  		if (ItemToRemove->GetItemType() == EEquipableType::EQTYPE_ARMOR) {
-  			/** Cast item to Armor */
-  			const auto ArmorItem = Cast<AArmor>(ItemToRemove);
-  
-  			/** Validate the old item */
-  			if (ArmorItem) {
-  				/** Remove the old item and drop or destroy */
-  				uint8 Key = static_cast<uint8>(ArmorItem->GetArmorType());
-  				const auto OldArmorItem = *EquippedArmor.Find(Key);
-  				// Drop or destroy...
-  
-  				/** Clear the value from the Map */
-  				EquippedArmor.Emplace(Key, nullptr);
-  			}
-  
-  			/** Update Equipment UI */
-  			OnEquipmentChanged.Broadcast();
-  			return true;
-  		}
-  	}
-  
-  	return false;
-}
+
 
 void UEquipmentComponent::PrepWeaponSwap(int32 ValueChange)
 {

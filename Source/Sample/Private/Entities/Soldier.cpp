@@ -184,6 +184,11 @@ void ASoldier::FinishReload()
 	}
 }
 
+void ASoldier::ResetReload(bool State)
+{
+	bCanReload = State;
+}
+
 void ASoldier::CheckReload()
 {
 	if (AGun* Gun = EquipmentComponent->GetCurrentWeapon()) {
