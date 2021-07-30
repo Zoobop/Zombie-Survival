@@ -31,7 +31,7 @@ class SAMPLE_API UStatAttributeModifier : public UDataAsset
 public:
 	UStatAttributeModifier();
 
-	void ApplyModification(class UStatAttribute* StatAttribute);
+	void ApplyModification(class UStatAttribute* StatAttribute, UWorld* EntityWorld);
 
 	void SetupModifier(int32 Amount, EModificationType MODType, EOperationType OPType, FName Tag);
 
@@ -46,6 +46,14 @@ public:
 	FORCEINLINE EModificationType GetModificationType() const { return ModificationType; }
 	/** Returns the operation type */
 	FORCEINLINE EOperationType GetOperationType() const { return OperationType; }
+
+protected:
+
+	void SetCurrentAttribute(class UStatAttribute* Current, UWorld* EntityWorld);
+
+	void ModificationTick();
+
+	void ClearTickTimer();
 
 protected:
 
@@ -64,9 +72,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatModification", meta = (EditCondition = "bAppliesTick"))
 	float TickTimerLength;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatModification", meta = (EditCondition = "bAppliesTick"))
+	float TickTimerStart;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatModification|Tags")
 	FName StatAttributeTag;
 
 	FTimerHandle TimerHandle_TickModification;
 
+private:
+
+	class UStatAttribute* CurrentAttribute;
+
+	class UWorld* GameWorld;
 };

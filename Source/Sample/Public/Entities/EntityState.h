@@ -27,7 +27,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void IncrementKillTotal();
 
+	/** Applies the modifiers to the player */
+	UFUNCTION(BlueprintCallable)
+	void ApplyModifiers();
+
+	/** Returns the player's current points */
 	FORCEINLINE int32 GetCurrentPoints() const { return CurrentPoints; }
+	/** Returns the player's gameplay modifiers */
+	FORCEINLINE class UStatAttributeSet* GetGameplayAttributes() const { return GameplayAttributes; }
+
+protected:
+
 
 public:
 	
@@ -36,6 +46,9 @@ public:
 	const static int32 PointsPerHit = 10;
 
 protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player")
+	class UStatAttributeSet* GameplayAttributes;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player")
 	int32 Kills = 0;

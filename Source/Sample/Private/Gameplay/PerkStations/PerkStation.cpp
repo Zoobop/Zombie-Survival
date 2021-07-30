@@ -2,20 +2,22 @@
 
 
 #include "Gameplay/PerkStations/PerkStation.h"
+#include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/BoxComponent.h"
 #include "Entities/Soldier.h"
 #include "Entities/EntityState.h"
 #include "Entities/EntityStatComponent.h"
-#include "StatAttributes/StatAttributeSet.h"
-#include "StatAttributes/StatAttributeModifier.h"
 
 // Sets default values
 APerkStation::APerkStation()
 {
+	StationBase = CreateDefaultSubobject<USceneComponent>("StationBase");
+	SetRootComponent(StationBase);
+
 	StationMesh = CreateDefaultSubobject<UStaticMeshComponent>("StationMesh");
-	SetRootComponent(StationMesh);
+	StationMesh->SetupAttachment(StationBase);
 
 	StationEmission = CreateDefaultSubobject<UPointLightComponent>("StationEmission");
 	StationEmission->SetupAttachment(StationMesh);
@@ -60,21 +62,6 @@ void APerkStation::Purchase(class ASoldier* Player)
 
 bool APerkStation::HasPerk(class ASoldier* Player) const
 {
-	/** Validate player */
-	if (Player) {
-
-		/** Validate player entity stat component */
-		if (UEntityStatComponent* EntityStatComponent = Player->GetEntityStatComponent()) {
-
-			for (auto PlayerModifier : EntityStatComponent->GetStatAttributeSet()->GetStatAttributeModifiers()) {
-				for (auto PerkModifier : PerkModifiers) {
-					if (PlayerModifier == PerkModifier) {
-						return true;
-					}
-				}
-			}
-		}
-	}
 	return false;
 }
 

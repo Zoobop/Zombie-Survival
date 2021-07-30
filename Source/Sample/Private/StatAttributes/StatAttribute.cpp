@@ -7,7 +7,7 @@
 UStatAttribute::UStatAttribute()
 {
 	BonusValue = 0;
-	DefaultValue = 100 + BonusValue;
+	DefaultValue = 100 + BonusValue + InfiniteBonusValue;
 	CurrentValue = DefaultValue;
 }
 
@@ -21,7 +21,7 @@ void UStatAttribute::SetValues(int32 Default, int32 Current, int32 Bonus)
 void UStatAttribute::ResetToDefault()
 {
 	BonusValue = 0;
-	DefaultValue = 100 + BonusValue;
+	DefaultValue = 100 + BonusValue + InfiniteBonusValue;
 	CurrentValue = DefaultValue;
 }
 
@@ -33,6 +33,9 @@ void UStatAttribute::ModifyCurrentValue(int32 Value)
 	/** Check for min value */
 	if (CurrentValue < MinValue)
 		CurrentValue = MinValue;
+	/** Check for current max value */
+	else if (CurrentValue > GetMaxCurrentValue())
+		CurrentValue = GetMaxCurrentValue();
 	/** Check if has max value */
 	else if (bHasMaxValue && CurrentValue > MaxValue)
 		CurrentValue = MaxValue;

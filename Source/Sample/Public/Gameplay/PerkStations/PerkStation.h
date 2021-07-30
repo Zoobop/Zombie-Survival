@@ -38,28 +38,32 @@ protected:
 
 protected:
 
+	/** Perk station base */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PerkStation")
+	class USceneComponent* StationBase;
+
 	/** Perk station mesh */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PerkStation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PerkStation")
 	class UStaticMeshComponent* StationMesh;
 
 	/** Perk station trigger */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PerkStation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PerkStation")
 	class UBoxComponent* PurchaseTrigger;
 
 	/** Perk station emission */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PerkStation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PerkStation")
 	class UPointLightComponent* StationEmission;
 
 	/** Perk station perk name */
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "PerkStation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PerkStation")
 	FText PerkName;
 
 	/** Perk station perk cost */
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "PerkStation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PerkStation")
 	int32 PerkCost;
 
 	/** Stat Modifier to be added to the player */
-	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "PerkStation")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PerkStation")
 	TArray<class UStatAttributeModifier*> PerkModifiers;
 
 };

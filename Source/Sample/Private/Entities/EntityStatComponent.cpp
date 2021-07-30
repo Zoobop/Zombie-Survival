@@ -49,7 +49,7 @@ void UEntityStatComponent::ReceiveStatAttributeModification(TArray<class UStatAt
 
 				if (Modifier->GetStatAttributeTag() == StatAttribute->GetStatAttributeTag()) {
 					/** Apply the modifier */
-					Modifier->ApplyModification(StatAttribute);
+					Modifier->ApplyModification(StatAttribute, GetWorld());
 
 					/** Check for the attribute death flags */
 					CheckForDeath(StatAttribute);
@@ -62,6 +62,7 @@ void UEntityStatComponent::ReceiveStatAttributeModification(TArray<class UStatAt
 
 		/** Manage modifiers */
 		ModifierMaintenance();
+		OnStatAttributeChanged.Broadcast();
 	}
 }
 

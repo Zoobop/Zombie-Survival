@@ -31,14 +31,21 @@ public:
 	/** Set the infinite bonus value */
 	void ModifyInfinteBonusValue(int32 Value);
 
+
 	/** Set Owner */
 	void SetOwningStatAttributeSet(class UStatAttributeSet* StatAttributeSet);
 
+	/** Returns the stat attribute tag of the stat attribute */
 	FORCEINLINE FName GetStatAttributeTag() const { return StatAttributeTag; }
+	/** Returns the current value of the stat attribute */
 	FORCEINLINE int32 GetCurrentValue() const { return CurrentValue; }
+	/** Returns the min current value of the stat attribute */
 	FORCEINLINE int32 GetMinValue() const { return MinValue; }
+	/** Returns the max current value of the stat attribute */
+	FORCEINLINE int32 GetMaxCurrentValue() const { return DefaultValue + BonusValue + InfiniteBonusValue; }
 	/** Returns if the current value is equal to the max value */
 	FORCEINLINE bool HasFullValue() const { return CurrentValue == DefaultValue + BonusValue + InfiniteBonusValue; }
+
 
 protected:
 
@@ -70,4 +77,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute|Tags")
 	FName StatAttributeTag;
+
+private:
+
+	float StartTime;
+
+	float TimeTickValue;
+
+	int32 ModifierValue;
 };

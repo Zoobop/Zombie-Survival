@@ -30,3 +30,8 @@ void AEntityState::IncrementKillTotal()
 {
 	Kills++;
 }
+
+void AEntityState::ApplyModifiers()
+{
+
+}

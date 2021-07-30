@@ -10,7 +10,7 @@ UStatAttributeModifier::UStatAttributeModifier()
 
 }
 
-void UStatAttributeModifier::ApplyModification(class UStatAttribute* StatAttribute)
+void UStatAttributeModifier::ApplyModification(class UStatAttribute* StatAttribute, UWorld* EntityWorld)
 {
 	switch (ModificationType)
 	{
@@ -29,7 +29,7 @@ void UStatAttributeModifier::ApplyModification(class UStatAttribute* StatAttribu
 		/** Instant action/effect for an indefinite time -- i.e. Gear and perk upgrades, debuffs that require action to rid */
 	case EModificationType::MODTYPE_INSTANT_INFINTE:
 
-		/**  Modifies the bonus value */
+		/** Modifies the bonus value */
 		if (OperationType == EOperationType::OPTYPE_ADD) {
 			StatAttribute->ModifyBonusValue(ModificationAmount);
 		}
@@ -39,9 +39,15 @@ void UStatAttributeModifier::ApplyModification(class UStatAttribute* StatAttribu
 		return;
 
 	case EModificationType::MODTYPE_TICK_INFINTE:
-		break;
+
+		/** Modifies the current value per tick */
+		if (OperationType == EOperationType::OPTYPE_ADD) {
+			//SetCurrentAttribute(StatAttribute, EntityWorld);
+		}
+		return;
+
 	case EModificationType::MODTYPE_TICK_TIMER:
-		break;
+		return;
 	default:
 		break;
 	}
@@ -53,4 +59,37 @@ void UStatAttributeModifier::SetupModifier(int32 Amount, EModificationType MODTy
 	ModificationType = MODType;
 	OperationType = OPType;
 	StatAttributeTag = Tag;
+}
+
+void UStatAttributeModifier::SetCurrentAttribute(class UStatAttribute* Current, UWorld* EntityWorld)
+{
+	/** Validate current */
+	if (Current) {
+
+		CurrentAttribute = Current;
+		GameWorld = EntityWorld;
+
+		GameWorld->GetTimerManager().SetTimer(TimerHandle_TickModification, this, &UStatAttributeModifier::ModificationTick, TickTimerLength, true, TickTimerStart);
+	}
+}
+
+void UStatAttributeModifier::ModificationTick()
+{
+	/** Validate current attribute */
+	if (CurrentAttribute) {
+
+		/** Check if the current value has reach the max current value */
+		if (CurrentAttribute->GetCurrentValue() >= CurrentAttribute->GetMaxCurrentValue()) {
+			ClearTickTimer();
+		}
+		else {
+			CurrentAttribute->ModifyCurrentValue(ModificationAmount);
+		}
+	}
+}
+
+void UStatAttributeModifier::ClearTickTimer()
+{
+	if (TimerHandle_TickModification.IsValid())
+		GameWorld->GetTimerManager().ClearTimer(TimerHandle_TickModification);
 }
