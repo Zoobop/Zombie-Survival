@@ -16,6 +16,9 @@ public:
 	/** Adds modifiers to the modifiers list */
 	void AddModifiers(TArray<class UStatAttributeModifier*> Modifiers);
 
+	/** Change modifier at a specific location */
+	void ChangeModifier(class UStatAttributeModifier* Modifier, int32 Index);
+
 	/** Clears all modifiers in the list */
 	void ClearModifiers();
 	

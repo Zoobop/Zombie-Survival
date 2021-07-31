@@ -68,6 +68,12 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	/** Apply current modifiers */
+	void ApplyCurrentModifiers();
+
+	/** Replaces the necessary modifiers */
+	void CheckModifiers(TArray<class UStatAttributeModifier*> Modifiers);
+
 	/** Clears and/or maintains all modifiers in the list */
 	virtual void ModifierMaintenance();
 

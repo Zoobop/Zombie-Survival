@@ -56,6 +56,10 @@ protected:
 
 	/** Perk station perk name */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PerkStation")
+	class UTexture2D* PerkIcon;
+
+	/** Perk station perk name */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "PerkStation")
 	FText PerkName;
 
 	/** Perk station perk cost */

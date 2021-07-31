@@ -2,8 +2,8 @@
 
 
 #include "Gameplay/PerkStations/StrongManPerkStation.h"
-#include "Entities/EntityStatComponent.h"
 #include "Entities/Soldier.h"
+#include "Entities/EntityState.h"
 #include "StatAttributes/StatAttributeSet.h"
 #include "StatAttributes/StatAttributeModifier.h"
 
@@ -19,12 +19,12 @@ bool AStrongManPerkStation::HasPerk(class ASoldier* Player) const
 	if (Player) {
 
 		/** Validate player entity stat component */
-		if (UEntityStatComponent* EntityStatComponent = Player->GetEntityStatComponent()) {
+		if (AEntityState* EntityState = Cast<AEntityState>(Player->GetPlayerState())) {
 
 			/** Search for perk modifiers */
-			for (auto PlayerModifier : EntityStatComponent->GetStatAttributeSet()->GetStatAttributeModifiers()) {
+			for (auto GameplayModifier : EntityState->GetGameplayModifiers()) {
 				for (auto PerkModifier : PerkModifiers) {
-					if (PlayerModifier == PerkModifier) {
+					if (GameplayModifier == PerkModifier) {
 						return true;
 					}
 				}

@@ -41,9 +41,8 @@ void UStatAttributeModifier::ApplyModification(class UStatAttribute* StatAttribu
 	case EModificationType::MODTYPE_TICK_INFINTE:
 
 		/** Modifies the current value per tick */
-		if (OperationType == EOperationType::OPTYPE_ADD) {
-			//SetCurrentAttribute(StatAttribute, EntityWorld);
-		}
+		SetCurrentAttribute(StatAttribute, EntityWorld);
+
 		return;
 
 	case EModificationType::MODTYPE_TICK_TIMER:
@@ -69,8 +68,49 @@ void UStatAttributeModifier::SetCurrentAttribute(class UStatAttribute* Current, 
 		CurrentAttribute = Current;
 		GameWorld = EntityWorld;
 
-		GameWorld->GetTimerManager().SetTimer(TimerHandle_TickModification, this, &UStatAttributeModifier::ModificationTick, TickTimerLength, true, TickTimerStart);
+		bHasFinishedTicking = false;
 	}
+}
+
+int32 UStatAttributeModifier::CompareByTag(UStatAttributeModifier* Other)
+{
+	/** Check if has valid tag */
+	if (GetStatModifierTag() == "None") {
+	}
+	/** Validate other */
+	else if (Other) {
+
+		/** Compare */
+		if (GetStatModifierTag() != Other->GetStatModifierTag()) {
+			return -1;
+		}
+		else {
+			/** Tags are equal */
+			return 0;
+		}
+
+	}
+	return -1;
+}
+
+bool UStatAttributeModifier::CompareByValue(UStatAttributeModifier* Other)
+{
+	/** Validate other */
+	if (Other) {
+
+		/** Compare */
+		if (GetModificationAmount() > Other->GetModificationAmount()) {
+			return true;
+		}
+
+	}
+	return false;
+}
+
+void UStatAttributeModifier::StartTickTimer()
+{
+	if (!TimerHandle_TickModification.IsValid())
+		GameWorld->GetTimerManager().SetTimer(TimerHandle_TickModification, this, &UStatAttributeModifier::ModificationTick, TickTimerLength, true, TickTimerStart);
 }
 
 void UStatAttributeModifier::ModificationTick()
@@ -83,13 +123,20 @@ void UStatAttributeModifier::ModificationTick()
 			ClearTickTimer();
 		}
 		else {
-			CurrentAttribute->ModifyCurrentValue(ModificationAmount);
+			if (OperationType == EOperationType::OPTYPE_ADD) {
+				CurrentAttribute->ModifyCurrentValue(ModificationAmount);
+			}
+			else {
+				CurrentAttribute->ModifyCurrentValue(-ModificationAmount);
+			}
 		}
 	}
 }
 
 void UStatAttributeModifier::ClearTickTimer()
 {
-	if (TimerHandle_TickModification.IsValid())
+	if (TimerHandle_TickModification.IsValid()) {
 		GameWorld->GetTimerManager().ClearTimer(TimerHandle_TickModification);
+		bHasFinishedTicking = true;
+	}
 }

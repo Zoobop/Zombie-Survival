@@ -18,11 +18,11 @@ bool ARecoveryExpertPerkStation::HasPerk(class ASoldier* Player) const
 	/** Validate player */
 	if (Player) {
 
-		/** Validate player state */
+		/** Validate player entity stat component */
 		if (AEntityState* EntityState = Cast<AEntityState>(Player->GetPlayerState())) {
-		
+
 			/** Search for perk modifiers */
-			for (auto GameplayModifier : EntityState->GetGameplayAttributes()->GetStatAttributeModifiers()) {
+			for (auto GameplayModifier : EntityState->GetGameplayModifiers()) {
 				for (auto PerkModifier : PerkModifiers) {
 					if (GameplayModifier == PerkModifier) {
 						return true;

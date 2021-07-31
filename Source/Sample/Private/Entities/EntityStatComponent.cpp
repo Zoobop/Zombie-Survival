@@ -36,11 +36,10 @@ void UEntityStatComponent::UndeadDefaults()
 	Faction = EFaction::FACTION_UNDEAD;
 }
 
-void UEntityStatComponent::ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers)
+void UEntityStatComponent::ApplyCurrentModifiers()
 {
-	/** Validate Stat Attribute Set and add all the modifiers to the Stat Attribute Set */
+	/** Validate Stat Attribute Set */
 	if (StatAttributeSet) {
-		StatAttributeSet->AddModifiers(Modifiers);
 
 		/** Search for matching attribute tags */
 		for (UStatAttribute* StatAttribute : StatAttributeSet->GetStatAttributes()) {
@@ -62,7 +61,32 @@ void UEntityStatComponent::ReceiveStatAttributeModification(TArray<class UStatAt
 
 		/** Manage modifiers */
 		ModifierMaintenance();
-		OnStatAttributeChanged.Broadcast();
+	}
+}
+
+void UEntityStatComponent::ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers)
+{
+	/** Validate Stat Attribute Set and add all the modifiers to the Stat Attribute Set */
+	if (StatAttributeSet) {
+		CheckModifiers(Modifiers);
+
+		ApplyCurrentModifiers();
+	}
+}
+
+void UEntityStatComponent::CheckModifiers(TArray<class UStatAttributeModifier*> Modifiers)
+{
+	/** Search through modifiers for matching modifier tags */
+	for (auto Modifier : StatAttributeSet->GetStatAttributeModifiers()) {
+		for (auto NewModifier : Modifiers) {
+
+			/** Compare modifiers */
+			if (Modifier->CompareByTag(NewModifier) == 0) {
+				StatAttributeSet->ClearModifier(Modifier);
+			}
+
+			StatAttributeSet->AddModifiers({ NewModifier });
+		}
 	}
 }
 
@@ -72,9 +96,28 @@ void UEntityStatComponent::ModifierMaintenance()
 	for (auto Modifier : StatAttributeSet->GetStatAttributeModifiers()) {
 
 		if (Modifier->GetModificationType() == EModificationType::MODTYPE_INSTANT_SINGLE) {
+
 			StatAttributeSet->ClearModifier(Modifier);
 		}
+		else if (Modifier->GetModificationType() == EModificationType::MODTYPE_INSTANT_INFINTE) {
+
+			StatAttributeSet->ClearModifier(Modifier);
+
+			if (AEntityState* EntityState = Cast<AEntityState>(Cast<AEntity>(GetOwner())->GetPlayerState())) {
+				EntityState->AddModifiers({ Modifier });
+			}
+			
+		}
+		else if (Modifier->GetModificationType() == EModificationType::MODTYPE_TICK_INFINTE) {
+
+			if (!Modifier->HasFinishedTick()) {
+				Modifier->StartTickTimer();
+			}
+
+		}
 	}
+
+	OnStatAttributeChanged.Broadcast();
 }
 
 class UStatAttribute* UEntityStatComponent::FindStatAttribute(FName Tag) const
@@ -144,16 +187,13 @@ void UEntityStatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 // Called when the game starts
 void UEntityStatComponent::BeginPlay()
 {
-
 	Super::BeginPlay();
 
 	if (StatAttributeSet) {
 		PresetStatAttributes();
-		UE_LOG(LogTemp, Warning, TEXT("Vaild attribute set!"))
 	}
-	else
-		UE_LOG(LogTemp, Warning, TEXT("Attribute set not found!"))
 
+	ApplyCurrentModifiers();
 	OnStatAttributeChanged.Broadcast();
 }
 

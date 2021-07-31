@@ -10,6 +10,11 @@ void UStatAttributeSet::AddModifiers(TArray<class UStatAttributeModifier*> Modif
 	StatAttributeModifiers.Append(Modifiers);
 }
 
+void UStatAttributeSet::ChangeModifier(class UStatAttributeModifier* Modifier, int32 Index)
+{
+	StatAttributeModifiers.Insert(Modifier, Index);
+}
+
 void UStatAttributeSet::ClearModifiers()
 {
 	StatAttributeModifiers.Empty();

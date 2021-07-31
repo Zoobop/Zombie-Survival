@@ -29,12 +29,13 @@ public:
 
 	/** Applies the modifiers to the player */
 	UFUNCTION(BlueprintCallable)
-	void ApplyModifiers();
+	void AddModifiers(TArray<class UStatAttributeModifier*> Modifiers);
+
 
 	/** Returns the player's current points */
 	FORCEINLINE int32 GetCurrentPoints() const { return CurrentPoints; }
 	/** Returns the player's gameplay modifiers */
-	FORCEINLINE class UStatAttributeSet* GetGameplayAttributes() const { return GameplayAttributes; }
+	FORCEINLINE TArray<class UStatAttributeModifier*> GetGameplayModifiers() const { return GameplayModifiers; }
 
 protected:
 
@@ -48,7 +49,7 @@ public:
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player")
-	class UStatAttributeSet* GameplayAttributes;
+	TArray<class UStatAttributeModifier*> GameplayModifiers;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player")
 	int32 Kills = 0;

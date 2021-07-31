@@ -3,6 +3,7 @@
 
 #include "Entities/EntityState.h"
 #include "Gamemodes/SurvivalGameState.h"
+#include "StatAttributes/StatAttributeModifier.h"
 
 AEntityState::AEntityState()
 {
@@ -31,7 +32,7 @@ void AEntityState::IncrementKillTotal()
 	Kills++;
 }
 
-void AEntityState::ApplyModifiers()
+void AEntityState::AddModifiers(TArray<class UStatAttributeModifier*> Modifiers)
 {
-
+	GameplayModifiers.Append(Modifiers);
 }

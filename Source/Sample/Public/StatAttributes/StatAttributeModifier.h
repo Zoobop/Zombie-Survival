@@ -35,24 +35,40 @@ public:
 
 	void SetupModifier(int32 Amount, EModificationType MODType, EOperationType OPType, FName Tag);
 
+	/** Starts the timer for modifiers that apply tick modification */
+	void StartTickTimer();
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnApplyModification();
 
+	/** Compares the Stat Attribute Modifiers by Modifier Tag */
+	int32 CompareByTag(UStatAttributeModifier* Other);
+
+	/** Compares the Stat Attribute Modifiers by Modifier Values */
+	bool CompareByValue(UStatAttributeModifier* Other);
+
 	/** Returns the Stat Attribute Tag */
 	FORCEINLINE FName GetStatAttributeTag() const { return StatAttributeTag; }
+	/** Returns the Stat Modifier Tag */
+	FORCEINLINE FName GetStatModifierTag() const { return StatModifierTag; }
 	/** Returns the modification amount */
 	FORCEINLINE int32 GetModificationAmount() const { return ModificationAmount; }
 	/** Returns the modification type */
 	FORCEINLINE EModificationType GetModificationType() const { return ModificationType; }
 	/** Returns the operation type */
 	FORCEINLINE EOperationType GetOperationType() const { return OperationType; }
+	/** Returns if the modifier tick has finished */
+	FORCEINLINE bool HasFinishedTick() const { return bHasFinishedTicking; }
 
 protected:
 
+	/** Stores in the stat attribute and world that is currently being modified  */
 	void SetCurrentAttribute(class UStatAttribute* Current, UWorld* EntityWorld);
 
+	/** Controls the application and exiting of tick timer */
 	void ModificationTick();
 
+	/** Clears the tick timer */
 	void ClearTickTimer();
 
 protected:
@@ -78,6 +94,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatModification|Tags")
 	FName StatAttributeTag;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatModification|Tags")
+	FName StatModifierTag;
+
 	FTimerHandle TimerHandle_TickModification;
 
 private:
@@ -85,4 +104,6 @@ private:
 	class UStatAttribute* CurrentAttribute;
 
 	class UWorld* GameWorld;
+
+	bool bHasFinishedTicking;
 };
