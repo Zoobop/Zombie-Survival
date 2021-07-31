@@ -47,6 +47,5 @@ void ADebris::RemoveDebris(class ASoldier* Player)
 	/** Moves and hides the debris */
 	OnRemoveDebris(Player);
 
-	/** Remove points */
 	RemovePointsFromPlayer(Player, DebrisCost);
 }

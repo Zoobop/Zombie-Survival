@@ -47,10 +47,10 @@ protected:
 	class UBoxComponent* PurchaseTrigger;
 
 	/** Debris name */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debris")
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Debris")
 	FText DebrisName;
 
 	/** Debris cost */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Debris")
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Debris")
 	int32 DebrisCost;
 };

@@ -7,7 +7,7 @@
 #include "PurchasableInterface.generated.h"
 
 // This class does not need to be modified.
-UINTERFACE(MinimalAPI)
+UINTERFACE(MinimalAPI, BlueprintType)
 class UPurchasableInterface : public UInterface
 {
 	GENERATED_BODY()
@@ -22,6 +22,12 @@ class SAMPLE_API IPurchasableInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void Activate();
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	FText GetDisplayText() const;
 
 	UFUNCTION()
 	virtual bool CheckPlayerPoints(class ASoldier* Player, int32 PointsNeeded) const;
