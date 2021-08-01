@@ -14,6 +14,11 @@ AUndeadSpawnPoint::AUndeadSpawnPoint()
 	BoxCollision->SetupAttachment(RootComponent);
 }
 
+void AUndeadSpawnPoint::SpawnUndead_Implementation()
+{
+	OnSpawnUndead();
+}
+
 // Called when the game starts or when spawned
 void AUndeadSpawnPoint::BeginPlay()
 {

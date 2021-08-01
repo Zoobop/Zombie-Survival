@@ -16,7 +16,7 @@ class SAMPLE_API ASurvivalGameState : public AGameStateBase
 	
 public:
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void StartNextRound();
 
 	UFUNCTION(BlueprintCallable)
@@ -36,6 +36,10 @@ public:
 	UFUNCTION()
 	void AddDebrisChannel(class ADebris* Debris);
 
+	/** Register the spawned undead */
+	UFUNCTION()
+	void AddSpawnedUndead(class AUndead* Undead);
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnSpawnLocationAdded(class AUndeadSpawnPoint* SpawnPoint);
 
@@ -50,12 +54,15 @@ protected:
 
 	void InitializeRound();
 
-	void SpawnUndead();
+	void BeginSpawnUndead();
 
 	void ClearSpawnTimer();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnRoundChanged();
+	void SpawnUndead(class AUndeadSpawnPoint* Spawnpoint);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnRoundChanged(int32 UndeadAmount);
 
 
 
@@ -69,8 +76,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, ReplicatedUsing = "OnRep_RoundChanged", Category = "SurvivalGame")
 	int32 RoundNumber = 0;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SurvivalGame")
-	int32 UndeadPerRound = 6;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "SurvivalGame")
+	int32 UndeadPerRound;
 
 	/** Number of undead at a time in the map */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -89,6 +96,8 @@ private:
 	/** Locations the undead can spawn */
 	TMap<int32, TArray<class AUndeadSpawnPoint*>> UndeadSpawnLocations;
 
+	const int32 DefaultUndeadAmount = 6;
+
 	UPROPERTY(EditDefaultsOnly, Category = "SurvivalGame")
 	bool bDoublePointsActivated;
 
@@ -99,7 +108,7 @@ private:
 	float TimeBetweenRounds = 5.0f;
 
 	UPROPERTY()
-	float TimeBetweenSpawning = 0.5f;
+	float TimeBetweenSpawning = 2.0f;
 
 	FTimerHandle TimerHandle_GameTimer;
 };

@@ -113,7 +113,7 @@ void AGun::Fire()
 			 
 				/** Do whatever happens when the bullet hits... */
 				UE_LOG(LogTemp, Warning, TEXT("Entity Hit: %f"), HitResult.GetActor())
-			 
+
 				/** Checks for IEntityStatSystemInterface and IESSModifierReceptionInterface */
 				IEntityStatSystemInterface* Interface = Cast<IEntityStatSystemInterface>(HitResult.GetActor());
 				if (Interface) {
@@ -136,9 +136,9 @@ void AGun::Fire()
 						OnEntityHit(Player, TotalDamage, HitResult);
 						Player->OnEntityHit();
 					}
-			 
+
 					UE_LOG(LogTemp, Warning, TEXT("Actor has Interface: %f"), Interface)
-				}			 
+				}
 			}
 
 			/** Invoke event */
@@ -204,6 +204,7 @@ void AGun::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProp
 	DOREPLIFETIME(AGun, CurrentMagazineAmmo);
 	DOREPLIFETIME(AGun, CurrentAmmoReserves);
 }
+
 
 void AGun::CheckFire()
 {

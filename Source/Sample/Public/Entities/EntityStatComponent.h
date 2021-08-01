@@ -69,10 +69,13 @@ protected:
 	virtual void BeginPlay() override;
 
 	/** Apply current modifiers */
+	UFUNCTION(BlueprintCallable)
 	void ApplyCurrentModifiers();
 
 	/** Replaces the necessary modifiers */
 	void CheckModifiers(TArray<class UStatAttributeModifier*> Modifiers);
+
+	void Reception();
 
 	/** Clears and/or maintains all modifiers in the list */
 	virtual void ModifierMaintenance();
@@ -116,5 +119,9 @@ protected:
 
 	UPROPERTY(BlueprintAssignable)
 	FOnHandleDeath OnHandleDeath;
+
+private:
+
+	TArray<class UStatAttributeModifier*> NewModifiers;
 };
 

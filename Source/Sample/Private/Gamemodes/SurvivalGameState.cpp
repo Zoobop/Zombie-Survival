@@ -19,11 +19,11 @@ void ASurvivalGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 
 void ASurvivalGameState::OnRep_RoundChanged()
 {
-	OnRoundChanged();
+	OnRoundChanged(UndeadPerRound);
 	InitializeSpawning();
 }
 
-void ASurvivalGameState::StartNextRound()
+void ASurvivalGameState::StartNextRound_Implementation()
 {
 	/** Get number of undead to spawn this round */
 	CalculateUndeadPerRound();
@@ -62,7 +62,7 @@ void ASurvivalGameState::UndeadKilled(class AUndead* Killed, class ASoldier* Kil
 
 void ASurvivalGameState::InitializeSpawning()
 {
-	GetWorldTimerManager().SetTimer(TimerHandle_GameTimer, this, &ASurvivalGameState::SpawnUndead, TimeBetweenSpawning, true, 2.0f);
+	GetWorldTimerManager().SetTimer(TimerHandle_GameTimer, this, &ASurvivalGameState::BeginSpawnUndead, TimeBetweenSpawning, true, 2.0f);
 }
 
 void ASurvivalGameState::AddSpawnLocation(class AUndeadSpawnPoint* SpawnPoint)
@@ -91,18 +91,45 @@ void ASurvivalGameState::AddDebrisChannel(class ADebris* Debris)
 	}
 }
 
+void ASurvivalGameState::AddSpawnedUndead(class AUndead* Undead)
+{
+	/** Validate undead */
+	if (Undead) {
+
+		CurrentUndead.Add(Undead);
+	}
+}
+
 void ASurvivalGameState::CalculateUndeadPerRound()
 {
+	/** Calculated base */
+	int32 NumberOfPlayers = 0;
+
+	/** Get game mode */
+	if (ASurvivalMode* SurvivalMode = Cast<ASurvivalMode>(GetWorld()->GetAuthGameMode())) {
+		NumberOfPlayers = SurvivalMode->GetAlivePlayers().Num();
+	}
+
+	int32 CalculatedPlayerBase = DefaultUndeadAmount;
+	if (NumberOfPlayers > 1)
+		CalculatedPlayerBase = DefaultUndeadAmount + NumberOfPlayers - 1;
+
+	int32 AlgorithmResult = CalculatedPlayerBase + RoundNumber * FMath::Pow((float)(DefaultUndeadAmount + NumberOfPlayers), 0.42f);
+
+	UndeadPerRound = AlgorithmResult + 1;
 
 }
 
 void ASurvivalGameState::InitializeRound()
 {
-	/** Increment round number */
-	++RoundNumber;
+	if (HasAuthority()) {
+		/** Increment round number */
+		++RoundNumber;
+		OnRep_RoundChanged();
+	}
 }
 
-void ASurvivalGameState::SpawnUndead()
+void ASurvivalGameState::BeginSpawnUndead()
 {
 	/** Check if there is room to spawn */
 	if (CanSpawn()) {
@@ -118,13 +145,7 @@ void ASurvivalGameState::SpawnUndead()
 			int32 RandomSpawnLocation = FMath::RandRange(0, UndeadSpawnLocations[RandomChannel].Num() - 1);
 
 			/** Spawn undead at location */
-			FVector SpawnLocation = UndeadSpawnLocations[RandomChannel][RandomSpawnLocation]->FindSpawnLocation();
-			FRotator SpawnRotation = FRotator::ZeroRotator;
-			FActorSpawnParameters SpawnParams;
-
-			AUndead* SpawnedUndead = GetWorld()->SpawnActor<AUndead>(AUndead::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
-
-			CurrentUndead.Add(SpawnedUndead);
+			UndeadSpawnLocations[RandomChannel][RandomSpawnLocation]->SpawnUndead();
 		}
 	}
 	else {

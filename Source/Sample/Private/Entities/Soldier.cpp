@@ -15,7 +15,7 @@
 #include "Items/Bullets/Bullet.h"
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
-#include "Gamemodes/SurvivalMode.h"
+#include "Gamemodes/SurvivalGameState.h"
 
 ASoldier::ASoldier()
 {
@@ -65,9 +65,8 @@ void ASoldier::SendDeathData(AEntity* Killed)
 {
 	if (HasAuthority()) {
 		if (AUndead* Undead = Cast<AUndead>(Killed)) {
-			if (ASurvivalMode* GameMode = Cast<ASurvivalMode>(GetWorld()->GetAuthGameMode())) {
-
-				
+			if (ASurvivalGameState* GameState = Cast<ASurvivalGameState>(GetWorld()->GetGameState())) {
+				GameState->UndeadKilled(Undead, this);
 			}
 		}
 	}

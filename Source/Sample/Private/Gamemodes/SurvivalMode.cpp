@@ -23,10 +23,6 @@ void ASurvivalMode::PostLogin(APlayerController* NewPlayer)
 	Super::PostLogin(NewPlayer);
 
 	AlivePlayers.Add(Cast<AEntityController>(NewPlayer));
-
-	if (ASurvivalGameState* SurvivalGameState = GetGameState<ASurvivalGameState>()) {
-		SurvivalGameState->StartNextRound();
-	}
 }
 
 void ASurvivalMode::PlayerDied(class ASoldier* Killed)
@@ -50,4 +46,8 @@ void ASurvivalMode::PlayerDied(class ASoldier* Killed)
 void ASurvivalMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (ASurvivalGameState* SurvivalGameState = GetGameState<ASurvivalGameState>()) {
+		SurvivalGameState->StartNextRound();
+	}
 }

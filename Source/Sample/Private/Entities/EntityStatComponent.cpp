@@ -56,7 +56,7 @@ void UEntityStatComponent::ApplyCurrentModifiers()
 			}
 
 			/** Update the Attribute changes */
-			OnStatAttributeChangedDebug.Broadcast(StatAttribute);
+			//OnStatAttributeChangedDebug.Broadcast(StatAttribute);
 		}
 
 		/** Manage modifiers */
@@ -68,26 +68,42 @@ void UEntityStatComponent::ReceiveStatAttributeModification(TArray<class UStatAt
 {
 	/** Validate Stat Attribute Set and add all the modifiers to the Stat Attribute Set */
 	if (StatAttributeSet) {
-		CheckModifiers(Modifiers);
 
-		ApplyCurrentModifiers();
+		NewModifiers.Empty();
+		NewModifiers.Append(Modifiers);
+
+		Reception();
+
 	}
 }
 
 void UEntityStatComponent::CheckModifiers(TArray<class UStatAttributeModifier*> Modifiers)
 {
-	/** Search through modifiers for matching modifier tags */
-	for (auto Modifier : StatAttributeSet->GetStatAttributeModifiers()) {
-		for (auto NewModifier : Modifiers) {
+	/** Check if Stat Attribute Set has modifiers */
+	if (StatAttributeSet->GetStatAttributeModifiers().Num() > 0) {
+		/** Search through modifiers for matching modifier tags */
+		for (auto Modifier : StatAttributeSet->GetStatAttributeModifiers()) {
+			for (auto NewModifier : Modifiers) {
 
-			/** Compare modifiers */
-			if (Modifier->CompareByTag(NewModifier) == 0) {
-				StatAttributeSet->ClearModifier(Modifier);
+				/** Compare modifiers */
+				if (Modifier->CompareByTag(NewModifier) == 0) {
+					StatAttributeSet->ClearModifier(Modifier);
+				}
+
+				StatAttributeSet->AddModifiers({ NewModifier });
 			}
-
-			StatAttributeSet->AddModifiers({ NewModifier });
 		}
 	}
+	else {
+		StatAttributeSet->AddModifiers(NewModifiers);
+	}
+}
+
+void UEntityStatComponent::Reception()
+{
+	CheckModifiers(NewModifiers);
+
+	ApplyCurrentModifiers();
 }
 
 void UEntityStatComponent::ModifierMaintenance()
@@ -147,7 +163,7 @@ void UEntityStatComponent::OnRep_Killer()
 	AEntity* EntityOwner = Cast<AEntity>(GetOwner());
 	EntityOwner->Ragdoll();
 	Killer->OnEntityKilled();
-	//Killer->SendDeathData(EntityOwner);
+	Killer->SendDeathData(EntityOwner);
 }
 
 void UEntityStatComponent::HandleDeath()

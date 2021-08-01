@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "UndeadSpawnPoint.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class SAMPLE_API AUndeadSpawnPoint : public AActor
 {
 	GENERATED_BODY()
@@ -15,9 +15,9 @@ public:
 	// Sets default values for this actor's properties
 	AUndeadSpawnPoint();
 
-	/** Spawns the undead with the box collider */
-	UFUNCTION(BlueprintImplementableEvent)
-	FVector FindSpawnLocation();
+	/** Spawns the undead at a random location within the bounding box */
+	UFUNCTION(Server, Reliable)
+	void SpawnUndead();
 
 	/** Returns the channel that corresponds with the map debris buy */
 	FORCEINLINE int32 GetDebrisChannel() const { return DebrisChannel; }
@@ -26,6 +26,10 @@ protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	/** Blueprint calculations */
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSpawnUndead();
 
 	/** Register spawn point with the game state */
 	void ValidateSpawnPoint();

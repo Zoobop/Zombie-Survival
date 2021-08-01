@@ -21,6 +21,13 @@ public:
 
 protected:
 
+	virtual void BeginPlay() override;
+
+	/** Register undead with the game state */
+	void ValidateUndead();
+
+protected:
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Undead")
 	class UStatAttributeModifier* StatAttributeModifier;
 };
