@@ -2,8 +2,9 @@
 
 
 #include "Spawning/UndeadSpawnPoint.h"
-#include "Gamemodes/SurvivalMode.h"
+#include "Gamemodes/SurvivalGameState.h"
 #include "Components/BoxComponent.h"
+#include "Entities/Undead.h"
 
 // Sets default values
 AUndeadSpawnPoint::AUndeadSpawnPoint()
@@ -24,6 +25,10 @@ void AUndeadSpawnPoint::BeginPlay()
 
 void AUndeadSpawnPoint::ValidateSpawnPoint()
 {
-	Cast<ASurvivalMode>(GetWorld()->GetAuthGameMode())->AddSpawnLocation(this);
+	/** Get the game state */
+	if (ASurvivalGameState* GameState = Cast<ASurvivalGameState>(GetWorld()->GetGameState())) {
+		GameState->AddSpawnLocation(this);
+	}
 }
+
 

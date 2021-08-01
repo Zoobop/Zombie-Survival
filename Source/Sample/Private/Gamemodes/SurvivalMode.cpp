@@ -29,38 +29,6 @@ void ASurvivalMode::PostLogin(APlayerController* NewPlayer)
 	}
 }
 
-void ASurvivalMode::UndeadDied(class AUndead* Killed, class ASoldier* Killer)
-{
-	if (Killed) {
-
-		/** Remove killed undead from list of current undead */
-		if (AEntityController* Undead = Cast<AEntityController>(Killed->GetController())) {
-			CurrentUndead.RemoveSingle(Undead);
-		}
-
-		/** Check if killed undead was last undead alive */
-		if (CurrentUndead.Num() == 0) {
-			if (ASurvivalGameState* SurvivalGameState = GetGameState<ASurvivalGameState>()) {
-				SurvivalGameState->StartNextRound();
-			}
-		}
-
-		/** Award the player with points */
-		if (Killer) {
-			if (AEntityState* EntityState = Cast<AEntityState>(Killer->GetPlayerState())) {
-				EntityState->AddPoints(AEntityState::PointsPerKill);
-				EntityState->IncrementKillTotal();
-			}
-		}
-
-	}
-}
-
-void ASurvivalMode::AddSpawnLocation(class AUndeadSpawnPoint* SpawnPoint)
-{
-
-}
-
 void ASurvivalMode::PlayerDied(class ASoldier* Killed)
 {
 	if (Killed) {

@@ -19,10 +19,6 @@ public:
 
 	void PlayerDied(class ASoldier* Killed);
 
-	void UndeadDied(class AUndead* Killed, class ASoldier* Killer);
-
-	void AddSpawnLocation(class AUndeadSpawnPoint* SpawnPoint);
-
 	FORCEINLINE TArray<class AEntityController*> GetAlivePlayers() const { return AlivePlayers; }
 
 protected:
@@ -32,20 +28,8 @@ protected:
 
 protected:
 
-	/** Number of undead at a time in the map */
-	UPROPERTY(Transient, BlueprintReadOnly)
-	int32 MaxSpawnedUndead;
-
 	/** Current players in the game */
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<class AEntityController*> AlivePlayers;
-
-	/** Current undead in the game */
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<class AEntityController*> CurrentUndead;
-
-	/** Locations the undead can spawn */
-	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<class AUndeadSpawnPoint*> UndeadSpawnLocations;
 
 };

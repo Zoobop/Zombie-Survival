@@ -16,17 +16,32 @@ class SAMPLE_API ASurvivalGameState : public AGameStateBase
 	
 public:
 
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	UFUNCTION()
-	void OnRep_RoundChanged();
-
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void StartNextRound();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void GameOver();
 
+	UFUNCTION(BlueprintCallable)
+	void UndeadKilled(class AUndead* Undead, class ASoldier* Player);
+
+	UFUNCTION()
+	void InitializeSpawning();
+
+	/** Register the spawn point */
+	UFUNCTION()
+	void AddSpawnLocation(class AUndeadSpawnPoint* SpawnPoint);
+
+	/** Register the debris */
+	UFUNCTION()
+	void AddDebrisChannel(class ADebris* Debris);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSpawnLocationAdded(class AUndeadSpawnPoint* SpawnPoint);
+
+	/** Returns if anymore undead can spawn */
+	FORCEINLINE bool CanSpawn() const { return CurrentUndead.Num() < MaxSpawnedUndead && CurrentUndead.Num() < UndeadPerRound; }
+	/** Returns if Double Points is activate */
 	FORCEINLINE bool IsDoublePointsActive() const { return bDoublePointsActivated; }
 
 protected:
@@ -35,15 +50,44 @@ protected:
 
 	void InitializeRound();
 
+	void SpawnUndead();
+
+	void ClearSpawnTimer();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnRoundChanged();
+
+
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION()
+	void OnRep_RoundChanged();
+
 public:
 
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = "OnRep_RoundChanged", Category = "SurvivalGame")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, ReplicatedUsing = "OnRep_RoundChanged", Category = "SurvivalGame")
 	int32 RoundNumber = 0;
 
-	UPROPERTY(EditDefaultsOnly, Category = "SurvivalGame")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "SurvivalGame")
 	int32 UndeadPerRound = 6;
 
+	/** Number of undead at a time in the map */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 MaxSpawnedUndead = 50;
+
+	/** Locations the undead can spawn */
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<class ADebris*> MapDebris;
+
+	/** Current undead in the game */
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<class AUndead*> CurrentUndead;
+
 private:
+
+	/** Locations the undead can spawn */
+	TMap<int32, TArray<class AUndeadSpawnPoint*>> UndeadSpawnLocations;
 
 	UPROPERTY(EditDefaultsOnly, Category = "SurvivalGame")
 	bool bDoublePointsActivated;
@@ -51,5 +95,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "SurvivalGame")
 	bool bInstaKillActivated;
 
-	FTimerHandle TimerHandle_RoundCountDown;
+	UPROPERTY()
+	float TimeBetweenRounds = 5.0f;
+
+	UPROPERTY()
+	float TimeBetweenSpawning = 0.5f;
+
+	FTimerHandle TimerHandle_GameTimer;
 };

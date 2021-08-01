@@ -20,7 +20,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void Purchase(class ASoldier* Player) override;
 
+	/** Returns the channel that corresponds with the map debris buy */
+	FORCEINLINE int32 GetDebrisChannel() const { return DebrisChannel; }
+
 protected:
+
+	/** Register debris with the game state */
+	void ValidateDebris();
 
 	/** Removes the debris from the map */
 	UFUNCTION(BlueprintCallable)
@@ -53,4 +59,8 @@ protected:
 	/** Debris cost */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Debris")
 	int32 DebrisCost;
+
+	/** Debris channel */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Debris")
+	int32 DebrisChannel = 0;
 };

@@ -67,7 +67,7 @@ void ASoldier::SendDeathData(AEntity* Killed)
 		if (AUndead* Undead = Cast<AUndead>(Killed)) {
 			if (ASurvivalMode* GameMode = Cast<ASurvivalMode>(GetWorld()->GetAuthGameMode())) {
 
-				GameMode->UndeadDied(Undead, this);
+				
 			}
 		}
 	}

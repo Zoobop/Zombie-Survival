@@ -15,15 +15,31 @@ public:
 	// Sets default values for this actor's properties
 	AUndeadSpawnPoint();
 
+	/** Spawns the undead with the box collider */
+	UFUNCTION(BlueprintImplementableEvent)
+	FVector FindSpawnLocation();
+
+	/** Returns the channel that corresponds with the map debris buy */
+	FORCEINLINE int32 GetDebrisChannel() const { return DebrisChannel; }
+
 protected:
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	/** Register spawn point with the game state */
 	void ValidateSpawnPoint();
 
 protected:	
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	class UBoxComponent* BoxCollision;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Spawning")
+	TSubclassOf<class AUndead> UndeadToSpawn;
+
+	/** Debris channel */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Debris")
+	int32 DebrisChannel = 0;
 
 };

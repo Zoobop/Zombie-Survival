@@ -8,6 +8,7 @@
 #include "Entities/Soldier.h"
 #include "Entities/EntityState.h"
 #include "Net/UnrealNetwork.h"
+#include "Gamemodes/SurvivalGameState.h"
 
 
 // Sets default values
@@ -42,10 +43,20 @@ void ADebris::Purchase(class ASoldier* Player)
 }
 
 
+void ADebris::ValidateDebris()
+{
+	/** Get the game state */
+	if (ASurvivalGameState* GameState = Cast<ASurvivalGameState>(GetWorld()->GetGameState())) {
+		GameState->AddDebrisChannel(this);
+	}
+}
+
 void ADebris::RemoveDebris(class ASoldier* Player)
 {
 	/** Moves and hides the debris */
 	OnRemoveDebris(Player);
 
 	RemovePointsFromPlayer(Player, DebrisCost);
+
+	ValidateDebris();
 }
