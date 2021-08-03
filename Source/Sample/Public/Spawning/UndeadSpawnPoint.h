@@ -31,6 +31,10 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnSpawnUndead();
 
+	/** Adds more Health and Speed to the Undead at spawn */
+	UFUNCTION(BlueprintPure)
+	TArray<class UStatAttributeModifier*> ApplyRoundBasedStats() const;
+
 	/** Register spawn point with the game state */
 	void ValidateSpawnPoint();
 

@@ -57,15 +57,16 @@ class UEntityStatComponent* AEntity::GetEntityStatComponent()
 	return EntityStatComponent;
 }
 
-void AEntity::Ragdoll()
+void AEntity::DeathPhysics()
 {
 	/** Makes the entity rag doll */
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->DisableMovement();
 
-	GetMesh()->SetSimulatePhysics(true);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionResponseToAllChannels(ECR_Block);
+
+	OnDeath();
 
 	SetLifeSpan(10.0f);
 }

@@ -3,12 +3,18 @@
 
 #include "StatAttributes/StatAttribute.h"
 #include "StatAttributes/StatAttributeSet.h"
+#include <Net/UnrealNetwork.h>
 
 UStatAttribute::UStatAttribute()
 {
 	BonusValue = 0;
 	DefaultValue = 100 + BonusValue + InfiniteBonusValue;
 	CurrentValue = DefaultValue;
+}
+
+void UStatAttribute::RefillAttributes()
+{
+	CurrentValue = DefaultValue + BonusValue + InfiniteBonusValue;
 }
 
 void UStatAttribute::SetValues(int32 Default, int32 Current, int32 Bonus)
@@ -55,4 +61,14 @@ void UStatAttribute::SetOwningStatAttributeSet(class UStatAttributeSet* StatAttr
 {
 	if (StatAttributeSet)
 		OwningStatAttributeSet = StatAttributeSet;
+}
+
+void UStatAttribute::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UStatAttribute, DefaultValue);
+	DOREPLIFETIME(UStatAttribute, CurrentValue);
+	DOREPLIFETIME(UStatAttribute, BonusValue);
+	DOREPLIFETIME(UStatAttribute, InfiniteBonusValue);
 }

@@ -38,6 +38,9 @@ public:
 	/** Set Undead default values */
 	void UndeadDefaults();
 
+	/** Re-fill all of the Stat Attributes */
+	void ReConfigureAttributes();
+
 	/** Call when receiving damage from another entity */
 	UFUNCTION(BlueprintCallable)
 	void ReceiveStatAttributeModification(TArray<class UStatAttributeModifier*> Modifiers) override;
@@ -71,6 +74,9 @@ protected:
 	/** Apply current modifiers */
 	UFUNCTION(BlueprintCallable)
 	void ApplyCurrentModifiers();
+
+	/** Allows for special attribute affects */
+	virtual void CustomizeAttributeAffects();
 
 	/** Replaces the necessary modifiers */
 	void CheckModifiers(TArray<class UStatAttributeModifier*> Modifiers);

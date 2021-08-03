@@ -10,6 +10,13 @@ UStatAttributeModifier::UStatAttributeModifier()
 
 }
 
+UStatAttributeModifier* UStatAttributeModifier::CreateModifier(int32 Amount, EModificationType MODType, EOperationType OPType, FName Tag)
+{
+	UStatAttributeModifier* NewModifier = NewObject<UStatAttributeModifier>();
+	NewModifier->SetupModifier(Amount, MODType, OPType, Tag);
+	return NewModifier;
+}
+
 void UStatAttributeModifier::ApplyModification(class UStatAttribute* StatAttribute, UWorld* EntityWorld)
 {
 	switch (ModificationType)

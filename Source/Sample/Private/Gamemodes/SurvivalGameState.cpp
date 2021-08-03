@@ -9,12 +9,17 @@
 #include "Spawning/UndeadSpawnPoint.h"
 #include "Net/UnrealNetwork.h"
 #include "Gameplay/DebrisBuys/Debris.h"
+#include "StatAttributes/StatAttributeModifier.h"
+#include "Entities/EntityStatComponent.h"
 
 void ASurvivalGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASurvivalGameState, RoundNumber);
+	DOREPLIFETIME(ASurvivalGameState, UndeadPerRound);
+	DOREPLIFETIME(ASurvivalGameState, UndeadLeft);
+	DOREPLIFETIME(ASurvivalGameState, UndeadModifiers);
 }
 
 void ASurvivalGameState::OnRep_RoundChanged()
@@ -27,6 +32,8 @@ void ASurvivalGameState::StartNextRound_Implementation()
 {
 	/** Get number of undead to spawn this round */
 	CalculateUndeadPerRound();
+	/** Get the correct stats based on the round */
+	CalculateUndeadStats();
 
 	/** Do round stuff... */
 	GetWorldTimerManager().SetTimer(TimerHandle_GameTimer, this, &ASurvivalGameState::InitializeRound, TimeBetweenRounds, false);
@@ -50,6 +57,10 @@ void ASurvivalGameState::UndeadKilled(class AUndead* Killed, class ASoldier* Kil
 				EntityState->AddPoints(AEntityState::PointsPerKill);
 				EntityState->IncrementKillTotal();
 			}
+		}
+
+		if (HasAuthority()) {
+			OnUndeadKilled();
 		}
 
 		/** Check if killed undead was last undead alive */
@@ -95,7 +106,26 @@ void ASurvivalGameState::AddSpawnedUndead(class AUndead* Undead)
 {
 	/** Validate undead */
 	if (Undead) {
+		if (HasAuthority()) {
 
+			if (RoundNumber > 1)
+				Undead->GetEntityStatComponent()->ReceiveStatAttributeModification(UndeadModifiers);
+
+			EState MovementState = EState::STATE_SLOW_WALK;
+
+			if (RoundNumber >= 4 && RoundNumber <= 7) {
+				MovementState = (EState)FMath::RandRange(1, 2);
+			}
+			else if (RoundNumber >= 7 && RoundNumber <= 12) {
+				MovementState = (EState)FMath::RandRange(2, 3);
+			}
+			else {
+				MovementState = EState::STATE_RUN;
+			}
+
+			Undead->SetMovementState(MovementState);
+			OnUndeadSpawned(Undead);
+		}
 		CurrentUndead.Add(Undead);
 	}
 }
@@ -116,8 +146,22 @@ void ASurvivalGameState::CalculateUndeadPerRound()
 
 	int32 AlgorithmResult = CalculatedPlayerBase + RoundNumber * FMath::Pow((float)(DefaultUndeadAmount + NumberOfPlayers), 0.42f);
 
-	UndeadPerRound = AlgorithmResult + 1;
+	UndeadPerRound = AlgorithmResult;
+	UndeadLeft = UndeadPerRound;
 
+}
+
+void ASurvivalGameState::CalculateUndeadStats()
+{
+	/** Calculated base */
+	int32 CalculatedHealth = (DefaultUndeadHealth * 0.5f) + ((RoundNumber * (DefaultUndeadHealth * .23f)));
+	int32 CalculatedSpeed = (DefaultUndeadSpeed * 0.5f) + ((RoundNumber * (DefaultUndeadHealth * .09f)));
+
+	UStatAttributeModifier* HealthModifier = UStatAttributeModifier::CreateModifier(CalculatedHealth, EModificationType::MODTYPE_INSTANT_INFINTE, EOperationType::OPTYPE_ADD, "Health");
+	UStatAttributeModifier* SpeedModifier = UStatAttributeModifier::CreateModifier(CalculatedSpeed, EModificationType::MODTYPE_INSTANT_INFINTE, EOperationType::OPTYPE_ADD, "Speed");
+
+	UndeadModifiers.Empty();
+	UndeadModifiers.Append({ HealthModifier, SpeedModifier });
 }
 
 void ASurvivalGameState::InitializeRound()

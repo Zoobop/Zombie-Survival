@@ -22,25 +22,42 @@ void ASurvivalMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	AlivePlayers.Add(Cast<AEntityController>(NewPlayer));
+	AlivePlayerControllers.Add(Cast<AEntityController>(NewPlayer));
 }
 
 void ASurvivalMode::PlayerDied(class ASoldier* Killed)
 {
 	if (Killed) {
 
+		/** Remove the player from the list of alive players */
 		if (AEntityController* Player = Cast<AEntityController>(Killed)) {
-			AlivePlayers.RemoveSingle(Player);
+			AlivePlayerControllers.RemoveSingle(Player);
 		}
 
 		/** Check if killed player was last player alive */
-		if (AlivePlayers.Num() == 0) {
+		if (AlivePlayerActors.Num() == 0) {
 			if (ASurvivalGameState* SurvivalGameState = GetGameState<ASurvivalGameState>()) {
 				SurvivalGameState->GameOver();
 			}
 		}
 
 	}
+}
+
+TArray<class ASoldier*> ASurvivalMode::GetPlayerActors()
+{
+	/** Make sure there are players in the game */
+	if (AlivePlayerControllers.Num() > 0) {
+
+		for (AEntityController* Controller : AlivePlayerControllers) {
+			if (ASoldier* Player = Cast<ASoldier>(Controller->GetPawn())) {
+				AlivePlayerActors.Add(Player);
+			}
+		}
+
+		return AlivePlayerActors;
+	}
+	return {};
 }
 
 void ASurvivalMode::BeginPlay()

@@ -28,6 +28,15 @@ void AUndeadSpawnPoint::BeginPlay()
 	
 }
 
+TArray<class UStatAttributeModifier*> AUndeadSpawnPoint::ApplyRoundBasedStats() const
+{
+	/** Get the game state */
+	if (ASurvivalGameState* GameState = Cast<ASurvivalGameState>(GetWorld()->GetGameState())) {
+		return GameState->GetModifiers();
+	}
+	return {};
+}
+
 void AUndeadSpawnPoint::ValidateSpawnPoint()
 {
 	/** Get the game state */

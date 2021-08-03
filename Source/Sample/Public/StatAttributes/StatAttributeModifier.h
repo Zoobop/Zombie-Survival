@@ -31,6 +31,10 @@ class SAMPLE_API UStatAttributeModifier : public UDataAsset
 public:
 	UStatAttributeModifier();
 
+
+	static UStatAttributeModifier* CreateModifier(int32 Amount, EModificationType MODType, EOperationType OPType, FName Tag);
+
+
 	void ApplyModification(class UStatAttribute* StatAttribute, UWorld* EntityWorld);
 
 	void SetupModifier(int32 Amount, EModificationType MODType, EOperationType OPType, FName Tag);

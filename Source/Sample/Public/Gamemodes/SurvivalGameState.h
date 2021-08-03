@@ -43,8 +43,10 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnSpawnLocationAdded(class AUndeadSpawnPoint* SpawnPoint);
 
+	/** Returns the Undead Modifiers */
+	FORCEINLINE TArray<class UStatAttributeModifier*> GetModifiers() const { return UndeadModifiers; }
 	/** Returns if anymore undead can spawn */
-	FORCEINLINE bool CanSpawn() const { return CurrentUndead.Num() < MaxSpawnedUndead && CurrentUndead.Num() < UndeadPerRound; }
+	FORCEINLINE bool CanSpawn() const { return CurrentUndead.Num() < MaxSpawnedUndead && CurrentUndead.Num() < UndeadPerRound && UndeadLeft != 0; }
 	/** Returns if Double Points is activate */
 	FORCEINLINE bool IsDoublePointsActive() const { return bDoublePointsActivated; }
 
@@ -52,11 +54,19 @@ protected:
 
 	void CalculateUndeadPerRound();
 
+	void CalculateUndeadStats();
+
 	void InitializeRound();
 
 	void BeginSpawnUndead();
 
 	void ClearSpawnTimer();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnUndeadSpawned(class AUndead* Undead);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnUndeadKilled();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void SpawnUndead(class AUndeadSpawnPoint* Spawnpoint);
@@ -79,6 +89,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "SurvivalGame")
 	int32 UndeadPerRound;
 
+	/** Number of undead left */
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category = "SurvivalGame")
+	int32 UndeadLeft = 0;
+
 	/** Number of undead at a time in the map */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int32 MaxSpawnedUndead = 50;
@@ -91,12 +105,19 @@ public:
 	UPROPERTY(Transient, BlueprintReadOnly)
 	TArray<class AUndead*> CurrentUndead;
 
+	UPROPERTY(Transient, BlueprintReadOnly, Replicated, Category = "SurvivalGame")
+	TArray<class UStatAttributeModifier*> UndeadModifiers;
+
 private:
 
 	/** Locations the undead can spawn */
 	TMap<int32, TArray<class AUndeadSpawnPoint*>> UndeadSpawnLocations;
 
 	const int32 DefaultUndeadAmount = 6;
+
+	const int32 DefaultUndeadHealth = 120;
+
+	const float DefaultUndeadSpeed = 100.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "SurvivalGame")
 	bool bDoublePointsActivated;

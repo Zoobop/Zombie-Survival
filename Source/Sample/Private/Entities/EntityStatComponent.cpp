@@ -11,6 +11,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Gamemodes/SurvivalGameState.h"
 #include "Gamemodes/SurvivalMode.h"
+#include <GameFramework/CharacterMovementComponent.h>
+
 
 // Sets default values for this component's properties
 UEntityStatComponent::UEntityStatComponent()
@@ -36,6 +38,18 @@ void UEntityStatComponent::UndeadDefaults()
 	Faction = EFaction::FACTION_UNDEAD;
 }
 
+void UEntityStatComponent::ReConfigureAttributes()
+{
+	/** Validate Stat Attribute Set */
+	if (StatAttributeSet) {
+
+		/** Reconfigure Attributes */
+		for (UStatAttribute* StatAttribute : StatAttributeSet->GetStatAttributes()) {
+			StatAttribute->RefillAttributes();
+		}
+	}
+}
+
 void UEntityStatComponent::ApplyCurrentModifiers()
 {
 	/** Validate Stat Attribute Set */
@@ -45,6 +59,9 @@ void UEntityStatComponent::ApplyCurrentModifiers()
 		for (UStatAttribute* StatAttribute : StatAttributeSet->GetStatAttributes()) {
 
 			for (UStatAttributeModifier* Modifier : StatAttributeSet->GetStatAttributeModifiers()) {
+
+				if (!Modifier)
+					return;
 
 				if (Modifier->GetStatAttributeTag() == StatAttribute->GetStatAttributeTag()) {
 					/** Apply the modifier */
@@ -56,11 +73,27 @@ void UEntityStatComponent::ApplyCurrentModifiers()
 			}
 
 			/** Update the Attribute changes */
-			//OnStatAttributeChangedDebug.Broadcast(StatAttribute);
+			OnStatAttributeChangedDebug.Broadcast(StatAttribute);
 		}
+
+		/** Customize attribute affects */
+		CustomizeAttributeAffects();
 
 		/** Manage modifiers */
 		ModifierMaintenance();
+	}
+}
+
+void UEntityStatComponent::CustomizeAttributeAffects()
+{
+	/** Customize attribute affectionately */
+	if (UStatAttribute* Health = FindStatAttribute("Health")) {
+
+	}
+
+	if (UStatAttribute* Speed = FindStatAttribute("Speed")) {
+		AEntity* Entity = Cast<AEntity>(GetOwner());
+		Entity->GetCharacterMovement()->MaxWalkSpeed = Speed->GetMaxCurrentValue();
 	}
 }
 
@@ -161,7 +194,7 @@ void UEntityStatComponent::OnRep_Killer()
 {
 	OnHandleDeath.Broadcast(Killer);
 	AEntity* EntityOwner = Cast<AEntity>(GetOwner());
-	EntityOwner->Ragdoll();
+	EntityOwner->DeathPhysics();
 	Killer->OnEntityKilled();
 	Killer->SendDeathData(EntityOwner);
 }

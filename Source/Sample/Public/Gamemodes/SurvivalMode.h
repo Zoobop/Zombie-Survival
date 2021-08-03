@@ -19,7 +19,10 @@ public:
 
 	void PlayerDied(class ASoldier* Killed);
 
-	FORCEINLINE TArray<class AEntityController*> GetAlivePlayers() const { return AlivePlayers; }
+	UFUNCTION(BlueprintCallable)
+	TArray<class ASoldier*> GetPlayerActors();
+
+	FORCEINLINE TArray<class AEntityController*> GetAlivePlayers() const { return AlivePlayerControllers; }
 
 protected:
 
@@ -30,6 +33,10 @@ protected:
 
 	/** Current players in the game */
 	UPROPERTY(Transient, BlueprintReadOnly)
-	TArray<class AEntityController*> AlivePlayers;
+	TArray<class AEntityController*> AlivePlayerControllers;
+
+	/** Current player actors */
+	UPROPERTY(Transient, BlueprintReadOnly)
+	TArray<class ASoldier*> AlivePlayerActors;
 
 };

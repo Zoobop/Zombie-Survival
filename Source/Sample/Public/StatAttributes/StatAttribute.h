@@ -16,6 +16,9 @@ public:
 
 	UStatAttribute();
 	
+	/** Refill the attributes */
+	void RefillAttributes();
+
 	/** Allows for editing the values */
 	void SetValues(int32 Default, int32 Current, int32 Bonus);
 
@@ -46,15 +49,18 @@ public:
 	/** Returns if the current value is equal to the max value */
 	FORCEINLINE bool HasFullValue() const { return CurrentValue == DefaultValue + BonusValue + InfiniteBonusValue; }
 
+protected:
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 
 	class UStatAttributeSet* OwningStatAttributeSet;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute", meta = (ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "StatAttribute", meta = (ClampMin = 0))
 	int32 DefaultValue;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute", meta = (ClampMin = 0))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "StatAttribute", meta = (ClampMin = 0))
 	int32 CurrentValue;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute")
@@ -66,10 +72,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute")
 	bool bHasMaxValue;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "StatAttribute")
 	int32 BonusValue;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "StatAttribute")
 	int32 InfiniteBonusValue;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "StatAttribute|Flags")

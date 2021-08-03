@@ -20,10 +20,15 @@ public:
 	/** Allows for safe referencing without Actor casting */
 	class UEntityStatComponent* GetEntityStatComponent() override;
 
-	/** Causes rag doll */
-	void Ragdoll();
+	/** Changes physics for death */
+	void DeathPhysics();
+
+	/** Blueprint event to play the death animation(s) */
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnDeath();
 
 	/** Sends death information to the gamemode */
+	UFUNCTION(BlueprintCallable)
 	virtual void SendDeathData(AEntity* Killed) PURE_VIRTUAL(AEntity, );
 
 	/** Retrieve current points */
