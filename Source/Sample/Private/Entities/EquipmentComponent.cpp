@@ -6,6 +6,9 @@
 #include "Items/Weapons/Gun.h"
 #include "Items/Weapons/Melee.h"
 #include "Items/Armor/Armor.h"
+#include "Items/Equipment/Lethal.h"
+#include "Items/Equipment/Tactical.h"
+#include "Items/Equipment/Consumable.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -54,6 +57,11 @@ bool UEquipmentComponent::AddGun(TSubclassOf<class AGun> GunToAdd)
 }
 
 
+
+void UEquipmentComponent::AddEquipment(TSubclassOf<class AEquipment> EquipmentToAdd)
+{
+
+}
 
 void UEquipmentComponent::PrepWeaponSwap(int32 ValueChange)
 {
@@ -204,6 +212,70 @@ class AArmor* UEquipmentComponent::HandleArmorSpawn(TSubclassOf<class AArmor> Ar
 	return nullptr;
 }
 
+class ALethal* UEquipmentComponent::HandleLethalSpawn(TSubclassOf<class ALethal> Lethal)
+{
+	if (Lethal) {
+
+		if (Player) {
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = Player;
+			SpawnParams.Instigator = Player;
+
+			ALethal* SpawnLethal = GetWorld()->SpawnActor<ALethal>(Lethal, Player->GetActorTransform(), SpawnParams);
+
+			SpawnLethal->AttachToComponent(Player->GetMeleeHolder(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+			SpawnLethal->SetActorHiddenInGame(true);
+
+			return SpawnLethal;
+		}
+
+	}
+	return nullptr;
+}
+
+class ATactical* UEquipmentComponent::HandleTacticalSpawn(TSubclassOf<class ALethal> Tactical)
+{
+	if (Tactical) {
+
+		if (Player) {
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = Player;
+			SpawnParams.Instigator = Player;
+
+			ATactical* SpawnTactical = GetWorld()->SpawnActor<ATactical>(Tactical, Player->GetActorTransform(), SpawnParams);
+
+			SpawnTactical->AttachToComponent(Player->GetMeleeHolder(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+			SpawnTactical->SetActorHiddenInGame(true);
+
+			return SpawnTactical;
+		}
+	}
+	return nullptr;
+}
+
+class AConsumable* UEquipmentComponent::HandleConsumableSpawn(TSubclassOf<class AConsumable> Consumable)
+{
+	if (Consumable) {
+
+		if (Player) {
+
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Owner = Player;
+			SpawnParams.Instigator = Player;
+
+			AConsumable* SpawnConsumable = GetWorld()->SpawnActor<AConsumable>(Consumable, Player->GetActorTransform(), SpawnParams);
+
+			SpawnConsumable->AttachToComponent(Player->GetMeleeHolder(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+			SpawnConsumable->SetActorHiddenInGame(true);
+
+			return SpawnConsumable;
+		}
+	}
+	return nullptr;
+}
+
 void UEquipmentComponent::InitializeEquipment()
 {
 	/** Validate default weapons */
@@ -222,22 +294,26 @@ void UEquipmentComponent::InitializeEquipment()
 
 	/** Validate default armor */
 	if (DefaultArmor.Num() > 0) {
-
+		/** Adds default armor to equipped list */
+		for (auto ArmorPair : DefaultArmor) {
+ 			AArmor* Armor = HandleArmorSpawn(ArmorPair.Value);
+ 			EquippedArmor.Add(ArmorPair.Key, Armor);
+		}
 	}
 
-	/** Validate default lethals */
-	if (DefaultLethals.Num() > 0) {
-
+	/** Validate default lethal */
+	if (DefaultLethal) {
+		EquippedLethal = HandleLethalSpawn(DefaultLethal);
 	}
 
-	/** Validate default tacticals */
-	if (DefaultTacticals.Num() > 0) {
-
+	/** Validate default tactical */
+	if (DefaultTactical) {
+		EquippedTactical = HandleTacticalSpawn(DefaultLethal);
 	}
 
-	/** Validate default consumables */
-	if (DefaultConsumables.Num() > 0) {
-
+	/** Validate default consumable */
+	if (DefaultConsumable) {
+		EquippedConsumable = HandleConsumableSpawn(DefaultConsumable);
 	}
 
 	PrepWeaponSwap(WeaponIndex);

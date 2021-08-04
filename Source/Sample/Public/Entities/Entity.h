@@ -28,8 +28,8 @@ public:
 	void OnDeath();
 
 	/** Sends death information to the gamemode */
-	UFUNCTION(BlueprintCallable)
-	virtual void SendDeathData(AEntity* Killed) PURE_VIRTUAL(AEntity, );
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	virtual void SendDeathData(AEntity* Killed);
 
 	/** Retrieve current points */
 	UFUNCTION(BlueprintImplementableEvent)
@@ -115,4 +115,8 @@ protected:
 	/** Default speed of the character */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	float DefaultMovementSpeed;
+
+	/** Status of the entity */
+	UPROPERTY(BlueprintReadWrite, Replicated)
+	bool bIsDead;
 };

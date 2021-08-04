@@ -40,17 +40,9 @@ protected:
 	/** Register undead with the game state */
 	void ValidateUndead();
 
-	/** Starts the search for the closest player */
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void InitializeSearch();
-
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void StopSearch();
-
-	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void FindPlayer(class ASurvivalMode* SurvivalMode);
-
-	void SearchForClosestPlayer();
+	/** Attacks the player */
+	UFUNCTION(Server, Reliable, NetMulticast, BlueprintCallable)
+	void AttackPlayer();
 
 protected:
 
@@ -64,5 +56,5 @@ private:
 
 	FTimerHandle TimerHandle_SearchTimer;
 
-	float SearchInterval = 0.1f;
+	float SearchInterval = 1.0f;
 };

@@ -71,6 +71,11 @@ void AEntity::DeathPhysics()
 	SetLifeSpan(10.0f);
 }
 
+void AEntity::SendDeathData_Implementation(AEntity* Killed)
+{
+
+}
+
 void AEntity::ServerOnEntityHit_Implementation()
 {
 	OnEntityHit();
@@ -82,6 +87,7 @@ void AEntity::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeP
 
 	DOREPLIFETIME(AEntity, Pitch);
 	DOREPLIFETIME(AEntity, Yaw);
+	DOREPLIFETIME(AEntity, bIsDead);
 }
 
 // Called when the game starts or when spawned

@@ -159,9 +159,8 @@ void UEntityStatComponent::ModifierMaintenance()
 		}
 		else if (Modifier->GetModificationType() == EModificationType::MODTYPE_TICK_INFINTE) {
 
-			if (!Modifier->HasFinishedTick()) {
-				Modifier->StartTickTimer();
-			}
+			Modifier->ClearTickTimer();
+			Modifier->StartTickTimer();
 
 		}
 	}

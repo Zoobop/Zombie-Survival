@@ -42,6 +42,9 @@ public:
 	/** Starts the timer for modifiers that apply tick modification */
 	void StartTickTimer();
 
+	/** Clears the tick timer */
+	void ClearTickTimer();
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnApplyModification();
 
@@ -71,9 +74,6 @@ protected:
 
 	/** Controls the application and exiting of tick timer */
 	void ModificationTick();
-
-	/** Clears the tick timer */
-	void ClearTickTimer();
 
 protected:
 

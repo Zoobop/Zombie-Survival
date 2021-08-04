@@ -8,6 +8,7 @@
 #include "Controllers/EntityController.h"
 #include "Gamemodes/SurvivalGameState.h"
 #include "Gamemodes/SurvivalMode.h"
+#include <DrawDebugHelpers.h>
 
 AUndead::AUndead()
 {
@@ -53,36 +54,43 @@ void AUndead::ValidateUndead()
 		GameState->AddSpawnedUndead(this);
 
 		GetEntityStatComponent()->ReConfigureAttributes();
-
-		InitializeSearch();
 	}
 }
 
-void AUndead::InitializeSearch_Implementation()
+void AUndead::AttackPlayer_Implementation()
 {
-	/** Start search timer */
-	if (!TimerHandle_SearchTimer.IsValid()) {
-		GetWorldTimerManager().SetTimer(TimerHandle_SearchTimer, this, &AUndead::SearchForClosestPlayer, SearchInterval, true);
-	}
-}
-
-void AUndead::StopSearch_Implementation()
-{
-	/** Stop search timer */
-	if (TimerHandle_SearchTimer.IsValid()) {
-		GetWorldTimerManager().ClearTimer(TimerHandle_SearchTimer);
-	}
-}
-
-void AUndead::SearchForClosestPlayer()
-{
-	/** Get game mode */
+	/** Get Authority */
 	if (HasAuthority()) {
-		if (ASurvivalMode* SurvivalMode = Cast<ASurvivalMode>(GetWorld()->GetAuthGameMode())) {
+		
+		/** Find raycast start and end locations */
+		FVector TraceStart = GetActorLocation();
+		FVector TraceDistance = GetActorLocation() + (GetActorRotation().Vector() * 100.0f);
 
-			/** Find and move to the closest player */
-			FindPlayer(SurvivalMode);
+		/** Setup ray casting */
+		FHitResult HitResult;
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceDistance, ECC_Visibility, QueryParams);
+
+		/** Debug line that shows the trace distance */
+		DrawDebugLine(GetWorld(), TraceStart, TraceDistance, FColor::Red, false, .1, 0, 2);
+
+		/** Check for hit */
+		if (bHit) {
+
+			/** Checks for IEntityStatSystemInterface and IESSModifierReceptionInterface */
+			IEntityStatSystemInterface* Interface = Cast<IEntityStatSystemInterface>(HitResult.GetActor());
+			if (Interface) {
+				/** Apply stat modifiers if not in the same faction */
+				if (GetEntityStatComponent()->GetFaction() != Interface->GetEntityStatComponent()->GetFaction()) {
+					Interface->GetEntityStatComponent()->SetDamageDealer(this);
+
+					/** Apply the modifiers to the entity */
+					Interface->GetEntityStatComponent()->ReceiveStatAttributeModification(ApplyStatAttributeModification());
+				}
+			}
 		}
 	}
+
 }
 

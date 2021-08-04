@@ -32,6 +32,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool AddGun(TSubclassOf<class AGun> GunToAdd);
 
+	/** Tries to add equipment to the list */
+	UFUNCTION(BlueprintCallable)
+	void AddEquipment(TSubclassOf<class AEquipment> EquipmentToAdd);
+
   	/** Switch weapon index to the new index */
 	void PrepWeaponSwap(int32 ValueChange);
 
@@ -51,6 +55,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	class AArmor* HandleArmorSpawn(TSubclassOf<class AArmor> Armor);
 
+	/** Spawns the lethal into the world */
+	UFUNCTION(BlueprintCallable)
+	class ALethal* HandleLethalSpawn(TSubclassOf<class ALethal> Lethal);
+
+	/** Spawns the lethal into the world */
+	UFUNCTION(BlueprintCallable)
+	class ATactical* HandleTacticalSpawn(TSubclassOf<class ALethal> Tactical);
+
+	/** Spawns the lethal into the world */
+	UFUNCTION(BlueprintCallable)
+	class AConsumable* HandleConsumableSpawn(TSubclassOf<class AConsumable> Consumable);
+
   	/** Returns the current weapon */
   	FORCEINLINE class AGun* GetCurrentWeapon() const { return CurrentWeapon; }
 	/** Returns the current melee */
@@ -62,11 +78,11 @@ public:
 	/** Returns the currently equipped armor */
 	FORCEINLINE TMap<uint8, class AArmor*> GetEquippedArmor() const { return EquippedArmor; }
 	/** Returns the currently equipped lethals */
-	FORCEINLINE TArray<class ALethal*> GetEquippedLethals() const { return EquippedLethals; }
+	FORCEINLINE class ALethal* GetEquippedLethal() const { return EquippedLethal; }
 	/** Returns the currently equipped tacticals */
-	FORCEINLINE TArray<class ATactical*> GetEquippedTacticals() const { return EquippedTacticals; }
+	FORCEINLINE class ATactical* GetEquippedTactical() const { return EquippedTactical; }
 	/** Returns the currently equipped consumables */
-	FORCEINLINE TArray<class AConsumable*> GetEquippedConsumables() const { return EquippedConsumables; }
+	FORCEINLINE class AConsumable* GetEquippedConsumable() const { return EquippedConsumable; }
 
 protected:
 
@@ -111,17 +127,17 @@ protected:
   	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Equipment")
   	TMap<uint8, TSubclassOf<class AArmor>> DefaultArmor;
   
-	/** List of lethals to give to the player at the start of the game */
+	/** Lethal to give to the player at the start of the game */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	TArray<TSubclassOf<class ALethal>> DefaultLethals;
+	TSubclassOf<class ALethal> DefaultLethal;
 
-	/** List of tacticals to give to the player at the start of the game */
+	/** Tactical to give to the player at the start of the game */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	TArray<TSubclassOf<class ATactical>> DefaultTacticals;
+	TSubclassOf<class ATactical> DefaultTactical;
 
-	/** List of consumables to give to the player at the start of the game */
+	/** Consumable to give to the player at the start of the game */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	TArray<TSubclassOf<class AConsumable>> DefaultConsumables;
+	TSubclassOf<class AConsumable> DefaultConsumable;
 
 	/** Starting melee weapon */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
@@ -135,17 +151,17 @@ protected:
   	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
   	TMap<uint8, class AArmor*> EquippedArmor;
 
-	/** Currently equipped lethals */
+	/** Currently equipped lethal */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
-	TArray<class ALethal*> EquippedLethals;
+	class ALethal* EquippedLethal;
   
-	/** Currently equipped tacticals */
+	/** Currently equipped tactical */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
-	TArray<class ATactical*> EquippedTacticals;
+	class ATactical* EquippedTactical;
 
-	/** Currently equipped consumables */
+	/** Currently equipped consumable */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
-	TArray<class AConsumable*> EquippedConsumables;
+	class AConsumable* EquippedConsumable;
 
   	/** Current Weapon */
   	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Equipment", ReplicatedUsing = "OnRep_WeaponChanged")

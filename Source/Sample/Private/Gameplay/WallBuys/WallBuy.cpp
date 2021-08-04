@@ -57,27 +57,21 @@ bool AWallBuy::CheckForItem(class ASoldier* Player)
 		}
 
 		/** Check equipped lethals */
-		if (Equipment->GetEquippedLethals().Num() > 0) {
-			for (auto Lethal : Equipment->GetEquippedLethals()) {
-				if (Lethal->GetClass() == ItemToBuy)
-					return true;
-			}
+		if (ALethal* Lethal = Equipment->GetEquippedLethal()) {
+			if (Lethal->GetClass() == ItemToBuy)
+				return true;
 		}
 
 		/** Check equipped tacticals */
-		if (Equipment->GetEquippedTacticals().Num() > 0) {
-			for (auto Tactical : Equipment->GetEquippedTacticals()) {
-				if (Tactical->GetClass() == ItemToBuy)
-					return true;
-			}
+		if (ATactical* Tactical = Equipment->GetEquippedTactical()) {
+			if (Tactical->GetClass() == ItemToBuy)
+				return true;
 		}
 
 	  	/** Check equipped consumables */
- 		if (Equipment->GetEquippedConsumables().Num() > 0) {
-  			for (auto Consumable : Equipment->GetEquippedConsumables()) {
-  				if (Consumable->GetClass() == ItemToBuy)
-  					return true;
-  			}
+ 		if (AConsumable* Consumable = Equipment->GetEquippedConsumable()) {
+  			if (Consumable->GetClass() == ItemToBuy)
+  				return true;
  		}
 
 	}

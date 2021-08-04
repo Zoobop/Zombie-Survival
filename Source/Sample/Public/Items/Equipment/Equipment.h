@@ -24,9 +24,28 @@ public:
 
 	AEquipment();
 
+	/** Fills the equipment to the max amount */
+	UFUNCTION(BlueprintCallable)
+	void RefillEquipment();
+
+	/** Adds the specific number to the amount */
+	UFUNCTION(BlueprintCallable)
+	void AdjustEquipmentAmount(int32 AmountToAdd);
+
 	/** Pure virtual function that uses the equipment specified by that equipment */
 	virtual void UseEquipment() PURE_VIRTUAL(AEquipment, );
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnUseEquipment();
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int32 Amount;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	int32 MaxAmount;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	class UTexture2D* Icon;
 };
