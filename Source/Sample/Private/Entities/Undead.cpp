@@ -9,6 +9,7 @@
 #include "Gamemodes/SurvivalGameState.h"
 #include "Gamemodes/SurvivalMode.h"
 #include <DrawDebugHelpers.h>
+#include <GameFramework/CharacterMovementComponent.h>
 
 AUndead::AUndead()
 {
@@ -18,6 +19,22 @@ AUndead::AUndead()
 void AUndead::SetMovementState(EState MovementState)
 {
 	State = MovementState;
+
+	switch (State)
+	{
+	case EState::STATE_SLOW_WALK:
+		GetCharacterMovement()->MaxWalkSpeed = 90.0f;
+		break;
+	case EState::STATE_NORMAL_WALK:
+		GetCharacterMovement()->MaxWalkSpeed = 180.0f;
+		break;
+	case EState::STATE_RUN:
+		GetCharacterMovement()->MaxWalkSpeed = 400.0f;
+		break;
+	default:
+		GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+		break;
+	}
 }
 
 void AUndead::SendDeathData(AEntity* Killed)

@@ -54,7 +54,6 @@ void ASurvivalGameState::UndeadKilled(class AUndead* Killed, class ASoldier* Kil
 		/** Award the player with points */
 		if (Killer) {
 			if (AEntityState* EntityState = Cast<AEntityState>(Killer->GetPlayerState())) {
-				EntityState->AddPoints(AEntityState::PointsPerKill);
 				EntityState->IncrementKillTotal();
 			}
 		}
@@ -99,6 +98,7 @@ void ASurvivalGameState::AddDebrisChannel(class ADebris* Debris)
 	/** Add debris to the list */
 	if (Debris) {
 		MapDebris.Add(Debris);
+		OnDebrisChannelAdded(Debris);
 	}
 }
 
@@ -119,7 +119,7 @@ void ASurvivalGameState::AddSpawnedUndead(class AUndead* Undead)
 			else if (RoundNumber >= 7 && RoundNumber <= 12) {
 				MovementState = (EState)FMath::RandRange(2, 3);
 			}
-			else {
+			else if (RoundNumber > 12) {
 				MovementState = EState::STATE_RUN;
 			}
 
@@ -155,13 +155,11 @@ void ASurvivalGameState::CalculateUndeadStats()
 {
 	/** Calculated base */
 	int32 CalculatedHealth = (DefaultUndeadHealth * 0.5f) + ((RoundNumber * (DefaultUndeadHealth * .23f)));
-	int32 CalculatedSpeed = (DefaultUndeadSpeed * 0.5f) + ((RoundNumber * (DefaultUndeadHealth * .09f)));
 
 	UStatAttributeModifier* HealthModifier = UStatAttributeModifier::CreateModifier(CalculatedHealth, EModificationType::MODTYPE_INSTANT_INFINTE, EOperationType::OPTYPE_ADD, "Health");
-	UStatAttributeModifier* SpeedModifier = UStatAttributeModifier::CreateModifier(CalculatedSpeed, EModificationType::MODTYPE_INSTANT_INFINTE, EOperationType::OPTYPE_ADD, "Speed");
 
 	UndeadModifiers.Empty();
-	UndeadModifiers.Append({ HealthModifier, SpeedModifier });
+	UndeadModifiers.Append({ HealthModifier });
 }
 
 void ASurvivalGameState::InitializeRound()
@@ -180,12 +178,8 @@ void ASurvivalGameState::BeginSpawnUndead()
 		/** Validate lists */
 		if (UndeadSpawnLocations.Num() > 0) {
 
-			/** Get number of keys */
-			TSet<int32> KeySet;
-			UndeadSpawnLocations.GetKeys(KeySet);
-
 			/** Get random map debris channel */
-			int32 RandomChannel = FMath::RandRange(0, KeySet.Num() - 1);
+			int32 RandomChannel = FMath::RandRange(0, MapDebris.Num());
 			int32 RandomSpawnLocation = FMath::RandRange(0, UndeadSpawnLocations[RandomChannel].Num() - 1);
 
 			/** Spawn undead at location */

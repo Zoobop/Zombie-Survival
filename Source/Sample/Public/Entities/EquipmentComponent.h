@@ -102,6 +102,8 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerAddGun(TSubclassOf<class AGun> GunToAdd);
 
+	/**  */
+
 	// Called when the game starts
 	virtual void BeginPlay() override;
 

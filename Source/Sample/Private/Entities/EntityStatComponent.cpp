@@ -92,8 +92,7 @@ void UEntityStatComponent::CustomizeAttributeAffects()
 	}
 
 	if (UStatAttribute* Speed = FindStatAttribute("Speed")) {
-		AEntity* Entity = Cast<AEntity>(GetOwner());
-		Entity->GetCharacterMovement()->MaxWalkSpeed = Speed->GetMaxCurrentValue();
+
 	}
 }
 

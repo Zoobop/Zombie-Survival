@@ -43,6 +43,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnSpawnLocationAdded(class AUndeadSpawnPoint* SpawnPoint);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnDebrisChannelAdded(class ADebris* Debris);
+
 	/** Returns the Undead Modifiers */
 	FORCEINLINE TArray<class UStatAttributeModifier*> GetModifiers() const { return UndeadModifiers; }
 	/** Returns if anymore undead can spawn */
