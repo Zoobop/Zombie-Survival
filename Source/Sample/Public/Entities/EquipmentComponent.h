@@ -34,7 +34,7 @@ public:
 
 	/** Tries to add equipment to the list */
 	UFUNCTION(BlueprintCallable)
-	void AddEquipment(TSubclassOf<class AEquipment> EquipmentToAdd);
+	bool AddEquipment(TSubclassOf<class AEquipment> EquipmentToAdd);
 
   	/** Switch weapon index to the new index */
 	void PrepWeaponSwap(int32 ValueChange);
@@ -102,7 +102,9 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerAddGun(TSubclassOf<class AGun> GunToAdd);
 
-	/**  */
+	/** Tells the server to add a gun */
+	UFUNCTION(Server, Reliable)
+	void ServerAddEquipment(TSubclassOf<class AEquipment> EquipmentToAdd);
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -154,15 +156,15 @@ protected:
   	TMap<uint8, class AArmor*> EquippedArmor;
 
 	/** Currently equipped lethal */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment", Replicated)
 	class ALethal* EquippedLethal;
   
 	/** Currently equipped tactical */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment", Replicated)
 	class ATactical* EquippedTactical;
 
 	/** Currently equipped consumable */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, Category = "Equipment", Replicated)
 	class AConsumable* EquippedConsumable;
 
   	/** Current Weapon */
@@ -174,11 +176,11 @@ protected:
 	class AMelee* CurrentMelee;
 
 	/** Event to update UI */
-	UPROPERTY(BlueprintAssignable, Category = "Equipment")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Equipment")
 	FOnEquipmentChanged OnEquipmentChanged;
 
 	/** Event to update weapon mesh */
-	UPROPERTY(BlueprintAssignable, Category = "Equipment")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Equipment")
 	FOnWeaponSwitched OnWeaponSwitched;
 
 private:

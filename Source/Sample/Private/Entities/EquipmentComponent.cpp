@@ -58,9 +58,47 @@ bool UEquipmentComponent::AddGun(TSubclassOf<class AGun> GunToAdd)
 
 
 
-void UEquipmentComponent::AddEquipment(TSubclassOf<class AEquipment> EquipmentToAdd)
+bool UEquipmentComponent::AddEquipment(TSubclassOf<class AEquipment> EquipmentToAdd)
 {
+	if (!Player->HasAuthority()) {
+		ServerAddEquipment(EquipmentToAdd);
+		return true;
+	}
+	else {
+		/** Validate gun to add */
+		if (EquipmentToAdd) {
 
+			/** Check for equipment type */
+			if (EquipmentToAdd == ALethal::StaticClass()) {
+
+				if (EquipmentToAdd == EquippedLethal->GetClass()) {
+
+					/** Increment lethal amount */
+					if (EquippedLethal->GetCurrentAmount() < EquippedLethal->GetMaxAmount()) {
+						EquippedLethal->AdjustEquipmentAmount(1);
+					}
+				}
+				else {
+
+					/** Spawn in the new lethal */
+					ALethal* NewLethal = HandleLethalSpawn(EquipmentToAdd.Get());
+					EquippedLethal = NewLethal;
+					EquippedLethal->RefillEquipment();
+				}
+
+			}
+			else if (EquipmentToAdd == ATactical::StaticClass()) {
+
+			}
+			else {
+
+			}
+
+			OnEquipmentChanged.Broadcast();
+			return true;
+		}
+	}
+	return false;
 }
 
 void UEquipmentComponent::PrepWeaponSwap(int32 ValueChange)
@@ -130,6 +168,39 @@ void UEquipmentComponent::ServerAddGun_Implementation(TSubclassOf<class AGun> Gu
 			EquippedWeapons[WeaponIndex] = NewGun;
 
 			OnWeaponSwitched.Broadcast(NewGun);
+		}
+	}
+}
+
+void UEquipmentComponent::ServerAddEquipment_Implementation(TSubclassOf<class AEquipment> EquipmentToAdd)
+{
+	/** Validate gun to add */
+	if (EquipmentToAdd) {
+
+		/** Check for equipment type */
+		if (EquipmentToAdd == ALethal::StaticClass()) {
+
+			if (EquipmentToAdd == EquippedLethal->GetClass()) {
+
+				/** Increment lethal amount */
+				if (EquippedLethal->GetCurrentAmount() < EquippedLethal->GetMaxAmount()) {
+					EquippedLethal->AdjustEquipmentAmount(1);
+				}
+			}
+			else {
+
+				/** Spawn in the new lethal */
+				ALethal* NewLethal = HandleLethalSpawn(EquipmentToAdd.Get());
+				EquippedLethal = NewLethal;
+				EquippedLethal->RefillEquipment();
+			}
+
+		}
+		else if (EquipmentToAdd == ATactical::StaticClass()) {
+
+		}
+		else {
+
 		}
 	}
 }
@@ -340,4 +411,7 @@ void UEquipmentComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(UEquipmentComponent, CurrentWeapon);
 	DOREPLIFETIME(UEquipmentComponent, CurrentMelee);
 	DOREPLIFETIME(UEquipmentComponent, WeaponIndex);
+	DOREPLIFETIME(UEquipmentComponent, EquippedLethal);
+	DOREPLIFETIME(UEquipmentComponent, EquippedTactical);
+	DOREPLIFETIME(UEquipmentComponent, EquippedConsumable);
 }
