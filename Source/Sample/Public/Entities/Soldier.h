@@ -119,6 +119,21 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void ResetReload(bool State);
 
+	/** ----------- Melee ------------ **/
+
+	UFUNCTION(Server, Reliable, NetMulticast, BlueprintCallable)
+	void MeleeAttack();
+
+	/** ----------- Equipment Usage ------------ **/
+
+	/** Disables all other actions while using equipment */
+	UFUNCTION(BlueprintCallable)
+	void DisableActions();
+
+	/** Disables all other actions while using equipment */
+	UFUNCTION(BlueprintCallable)
+	void EnableActions();
+
 	/** ----------- General Usage ------------ **/
 
 	UFUNCTION(Server, Reliable)
@@ -224,6 +239,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	bool bCanInteract;
+
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	bool bCanFire;
 
 	UPROPERTY(BlueprintReadOnly, Replicated)
 	bool bCanMelee;

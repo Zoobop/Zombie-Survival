@@ -16,6 +16,7 @@
 #include "DrawDebugHelpers.h"
 #include "Net/UnrealNetwork.h"
 #include "Gamemodes/SurvivalGameState.h"
+#include "Items/Weapons/Melee.h"
 
 ASoldier::ASoldier()
 {
@@ -42,6 +43,7 @@ ASoldier::ASoldier()
 	bCanSprint = true;
 	bCanMelee = true;
 	bCanReload = true;
+	bCanFire = true;
 	bIsCrouching = false;
 
 	DefaultMovementSpeed = 400.0f;
@@ -186,6 +188,58 @@ void ASoldier::FinishReload()
 void ASoldier::ResetReload(bool State)
 {
 	bCanReload = State;
+}
+
+void ASoldier::MeleeAttack_Implementation()
+{
+	/** Get Authority */
+	if (HasAuthority()) {
+
+		/** Find raycast start and end locations */
+		FVector TraceStart = FollowCamera->GetComponentLocation();
+		FVector TraceDistance = TraceStart + (FollowCamera->GetComponentRotation().Vector() * 400.0f);
+
+		/** Setup ray casting */
+		FHitResult HitResult;
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceDistance, ECC_Visibility, QueryParams);
+
+		/** Debug line that shows the trace distance */
+		DrawDebugLine(GetWorld(), TraceStart, TraceDistance, FColor::Red, false, .1, 0, 2);
+
+		/** Check for hit */
+		if (bHit) {
+
+			/** Checks for IEntityStatSystemInterface and IESSModifierReceptionInterface */
+			IEntityStatSystemInterface* Interface = Cast<IEntityStatSystemInterface>(HitResult.GetActor());
+			if (Interface) {
+				/** Apply stat modifiers if not in the same faction */
+				if (GetEntityStatComponent()->GetFaction() != Interface->GetEntityStatComponent()->GetFaction()) {
+					Interface->GetEntityStatComponent()->SetDamageDealer(this);
+
+					/** Apply the modifiers to the entity */
+					Interface->GetEntityStatComponent()->ReceiveStatAttributeModification(EquipmentComponent->GetCurrentMelee()->ApplyStatAttributeModification());
+				}
+			}
+		}
+	}
+}
+
+void ASoldier::DisableActions()
+{
+	bCanFire = false;
+	bCanReload = false;
+	bCanMelee = false;
+	bCanSwitchWeapons = false;
+}
+
+void ASoldier::EnableActions()
+{
+	bCanFire = true;
+	bCanReload = true;
+	bCanMelee = true;
+	bCanSwitchWeapons = true;
 }
 
 void ASoldier::CheckReload()
@@ -350,13 +404,15 @@ void ASoldier::StartFire()
 	/** Validate the current weapon */
 	if (EquipmentComponent->GetCurrentWeapon()) {
 
-		if (!HasAuthority()) {
-			/** Fire weapon */
-			ServerOnFire();
-		}
-		else {
-			/** Fire weapon */
-			UseCurrentGun();
+		if (bCanFire) {
+			if (!HasAuthority()) {
+				/** Fire weapon */
+				ServerOnFire();
+			}
+			else {
+				/** Fire weapon */
+				UseCurrentGun();
+			}
 		}
 	}
 }
