@@ -41,10 +41,11 @@ public:
 	bool CanUseEquipment() const;
 
 	/** Pure virtual function that uses the equipment specified by that equipment */
-	virtual void UseEquipment() PURE_VIRTUAL(AEquipment, );
+	UFUNCTION(BlueprintCallable)
+	virtual void UseEquipment(class ASoldier* Player) PURE_VIRTUAL(AEquipment, );
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnUseEquipment();
+	void OnUseEquipment(class ASoldier* Player);
 
 	/** Returns the current amount */
 	FORCEINLINE int32 GetCurrentAmount() const { return Amount; }

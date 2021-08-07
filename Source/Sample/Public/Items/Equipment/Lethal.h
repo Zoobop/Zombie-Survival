@@ -14,4 +14,9 @@ class SAMPLE_API ALethal : public AEquipment
 {
 	GENERATED_BODY()
 	
+public:
+
+	ALethal();
+
+	virtual void UseEquipment(class ASoldier* Player) override;
 };

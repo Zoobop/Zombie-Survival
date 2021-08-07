@@ -2,4 +2,18 @@
 
 
 #include "Items/Equipment/Lethal.h"
+#include "Entities/Soldier.h"
 
+ALethal::ALethal()
+{
+
+}
+
+void ALethal::UseEquipment(class ASoldier* Player)
+{
+	/** Validate player */
+	if (Player) {
+
+		OnUseEquipment(Player);
+	}
+}

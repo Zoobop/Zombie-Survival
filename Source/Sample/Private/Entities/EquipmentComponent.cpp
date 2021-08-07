@@ -45,7 +45,6 @@ bool UEquipmentComponent::AddGun(TSubclassOf<class AGun> GunToAdd)
 			else {
 				/** Replace with current weapon if full */
 				AGun* NewGun = HandleWeaponSpawn(GunToAdd);
-				AGun* OldGun = EquippedWeapons[WeaponIndex];
 				EquippedWeapons[WeaponIndex] = NewGun;
 
 				OnWeaponSwitched.Broadcast(NewGun);

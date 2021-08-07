@@ -134,6 +134,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void EnableActions();
 
+	/** Use the specified equipment */
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void OnUseEquipment(class AEquipment* Equipment);
+
 	/** ----------- General Usage ------------ **/
 
 	UFUNCTION(Server, Reliable)
