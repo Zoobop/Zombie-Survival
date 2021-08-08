@@ -6,7 +6,9 @@ Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://j
 
 ### Gameplay
 
-A standard round-based zombie survival game that incorporates third person gunplay, resource management, and strategy to defending against impending doom. **Note: This build of the game is a demo and is not a representation of the full game**
+A standard round-based zombie survival game that incorporates third person gunplay, resource management, and strategy to defending against impending doom.
+
+**Note: This build of the game is a demo and is not a representation of the full game**
 
 ### Markdown
 
