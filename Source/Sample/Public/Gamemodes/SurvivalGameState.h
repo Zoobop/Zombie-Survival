@@ -87,7 +87,7 @@ protected:
 public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, ReplicatedUsing = "OnRep_RoundChanged", Category = "SurvivalGame")
-	int32 RoundNumber = 0;
+	int32 RoundNumber = 20;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "SurvivalGame")
 	int32 UndeadPerRound;

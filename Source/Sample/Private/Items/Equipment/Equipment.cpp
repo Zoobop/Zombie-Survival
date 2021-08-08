@@ -9,7 +9,6 @@ AEquipment::AEquipment()
 	Amount = 2;
 	MaxAmount = 4;
 	
-	SetActorHiddenInGame(true);
 }
 
 void AEquipment::RefillEquipment()

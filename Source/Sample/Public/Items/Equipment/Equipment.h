@@ -58,6 +58,9 @@ protected:
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	FName Tag;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment", Replicated)
 	int32 Amount;
 

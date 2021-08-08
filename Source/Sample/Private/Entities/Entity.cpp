@@ -10,6 +10,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Entities/Undead.h"
 
 // Sets default values
 AEntity::AEntity()
@@ -62,13 +63,15 @@ void AEntity::DeathPhysics()
 	/** Makes the entity rag doll */
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCharacterMovement()->DisableMovement();
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 0.0f, 0.0f);
 
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionResponseToAllChannels(ECR_Block);
 
 	OnDeath();
 
-	SetLifeSpan(10.0f);
+	if (this->GetClass() == AUndead::StaticClass())
+		SetLifeSpan(10.0f);
 }
 
 void AEntity::SendDeathData_Implementation(AEntity* Killed)
