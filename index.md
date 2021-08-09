@@ -13,9 +13,6 @@ Features:
   - Upgradable weapons via points at the upgrade station
   - Multiplayer co-op with up to 4 players
 
-
-A standard round-based zombie survival game that incorporates third person gunplay, resource management, and strategy to defending against impending doom.
-
 _**Note: This build of the game is a demo and is not a representation of the full game**_
 
 ### Markdown
