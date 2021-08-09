@@ -8,7 +8,15 @@ Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://j
 
 Features:
 
-  - 
+  - Ability to swap between multiple equipped weapons and switch out different weapons via wallbuys and pickups
+  - Ability to use a variety of equipment to inflict damage
+  - Crouching and proning for better recoil control
+  - A point system for purchasing new weapons, doors, perks, and upgrades
+  - Entity Stat System (ESS), a dynamic, fully networked,  and simplistic stat system that is easy to modify and add to while being reusable and extensible. Most of the system       is integrated in a single component for ease of use.
+  - Upgradable weapons via points at the upgrade station
+  - Weight of weapons impact sprint time and speed
+  - Multiplayer co-op
+
 
 A standard round-based zombie survival game that incorporates third person gunplay, resource management, and strategy to defending against impending doom.
 
