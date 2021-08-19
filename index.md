@@ -1,7 +1,7 @@
 ## Welcome to Zombie Survival _(Demo)_
 
-Business: [mindOfZoo@gmail.com]()
-Personal: [brandonham2001@gmail.com]()
+Personal: [mindOfZoo@gmail.com]()
+Business: [brandonham2001@gmail.com]()
 
 ### Gameplay
 
